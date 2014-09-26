@@ -295,7 +295,7 @@ if($errorPayment){
                     <form id="form-recover" method="post" />
                         <ul class="thumbnails pricing-table color-white" style="margin-top: 5px;">
                             <li class="span4 grd-teal" style="width: 100%;margin: 0 auto;">
-                                <h3>Only One (*)</h3>
+                                <h3>Only One</h3>
                                 <div class="price-body bg-white color-teal">
                                     <div class="price">
                                         <span class="price-figure">5%</span>

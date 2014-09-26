@@ -27,6 +27,7 @@ class user
     public $update_date;
     public $update_user;
     public $profiles = array();
+    public $disciplines = array();
 
     function user(){
         $this->con = new DataBase();
@@ -83,11 +84,18 @@ class user
 
             $query_profiles = $this->con->genericQuery("select fk_profile from user_profiles 
                                                         where fk_user = " . $this->id);
-
             
-
             if (count($query_profiles) > 0) {
                 foreach ($query_profiles as $value) {
+                    if($value['fk_profile'] == 2){
+                        $query_disciplines = $this->con->genericQuery("select CONCAT(`fk_discipline`, ' - ', `price`) as `disciplines_price` from user_disciplines 
+                                                        where fk_user = " . $this->id);
+                        if (count($query_disciplines) > 0) {
+                            foreach ($query_disciplines as $vdisc) {
+                                array_push($this->disciplines,$vdisc['disciplines_price']);
+                            }
+                        }
+                    }
                     array_push($this->profiles,$value['fk_profile']);
                 }
             }
@@ -129,6 +137,19 @@ class user
             
             $query = "insert into user_profiles(fk_user,fk_profile,first_profile)
                       values(".$idUser.",".$value.",".$first_prof.")";
+            $this->con->genericQuery($query);
+        }   
+    }
+
+    function saveDiscplines($idUser, $disciplines_price)
+    {
+        $query = "delete from user_disciplines where fk_user=" . $idUser;
+        $this->con->genericQuery($query);
+        $first = true;
+        foreach ($disciplines_price as $value) {
+            list($discpline, $price) = split(' - ', $value);
+            $query = "insert into user_disciplines(fk_user,fk_discipline,price)
+                      values(".$idUser.",".$discpline.",".$price.")";
             $this->con->genericQuery($query);
         }   
     }

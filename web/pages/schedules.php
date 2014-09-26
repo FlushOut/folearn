@@ -154,7 +154,7 @@ if($scheDel){
                         <div class="content-breadcrumb">
                             <!--breadcrumb-->
                             <ul class="breadcrumb">
-                                <li><a href="index.html"><i class="icofont-home"></i> Categories</a> <span class="divider">&rsaquo;</span></li>
+                                <li><a href="#"><i class="icofont-home"></i> Schedules</a> <span class="divider">&rsaquo;</span></li>
                                 <li class="active">List</li>
                             </ul><!--/breadcrumb-->
                         </div><!-- /content-breadcrumb -->
@@ -353,8 +353,9 @@ if($scheDel){
 
                         var id = idUser;
                         var action = "getScheduleDetails";
+                        $("#hdIdAct").val('');
                         $("#btnDelete").hide();
-                        $("#btnSave").show();
+                        $("#btnSave").hide();
                         $(".controls").html("Loanding...");
 
                         $('#myModalScheduleDetails').modal('show');
@@ -367,14 +368,16 @@ if($scheDel){
                                 var data = jQuery.parseJSON(resp);
                                     $(".controls").html(data.html);
                                     if(check < today) {
-                                        $("#btnDelete").hide();
-                                        $("#btnSave").hide();
                                         $(".controls :input").attr('disabled', true);
                                     }else{
                                         if(data.id > 0){
                                             $("#hdIdAct").val(data.id);
                                             $("#btnSave").text('Update');
+                                            $("#btnSave").show();
                                             $("#btnDelete").show();
+                                        }else{
+                                            $("#btnSave").text('Save');
+                                            $("#btnSave").show();
                                         }    
                                     }
                                     

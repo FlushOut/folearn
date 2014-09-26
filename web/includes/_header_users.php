@@ -9,6 +9,7 @@ $invoice = number_format($payment->invoice,2,",",".");
 
 <!-- content-header -->
                         <div class="content-header">
+                            <? if($isAdmin){ ?>
                             <ul class="content-header-action pull-right">
                                 <li>
                                     <a href="/pages/lesson-reports.php">
@@ -23,7 +24,8 @@ $invoice = number_format($payment->invoice,2,",",".");
                                         <div class="action-text color-orange"><?php echo $invoice; ?> <span class="helper-font-small color-silver-dark">Invoice</span></div>
                                     </a>
                                 </li>
-
                             </ul>
+                            <? } ?>
                             <h2><i class="icofont-bookmark"></i> Learn</h2>
                         </div><!-- /content-header -->
+                        
