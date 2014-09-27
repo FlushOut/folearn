@@ -24,6 +24,12 @@ switch ($_POST['action']) {
     case 'getLessonDetails':
         getLessonDetails($id,$idMob);
         break;
+    case 'getSchedulesByUserDate':
+        getSchedulesByUserDate($idUsers,$dtStart,$dtEnd);
+        break;
+    case 'getLessonsByStatUserDate':
+        getLessonsByStatUserDate($id,$idUsers,$dtStart,$dtEnd,$company->fk_country);
+        break;
 	default:
         # code...
         break;
@@ -160,7 +166,107 @@ function getLessonDetails($idCli,$idMob){
         $html.= '</label>';
     }
     echo $html;
+}
 
+function getSchedulesByUserDate($idUsers,$dtStart,$dtEnd){
+
+    $users = "";
+    foreach($idUsers as $u) {
+        $users .= $u.",";
+    }
+    $users = substr($users, 0, -1);
+
+    $schedule = new schedule();
+    $data = array();
+    $i = 0;
+
+    $list_schedules = $schedule->getByUserDate($users,$dtStart,$dtEnd);
+    $html.= '<table id="datatables" class="table table-bordered table-striped responsive">';
+    $html.= '   <thead>';
+    $html.= '       <tr>';
+    $html.= '           <th class="head0">User</th>';
+    $html.= '           <th class="head1">Date</th>';
+    $html.= '           <th class="head0">Month</th>';
+    $html.= '           <th class="head1">Day</th>';
+    $html.= '           <th class="head0">Hours</th>';
+    $html.= '       </tr>';
+    $html.= '   </thead>';
+    $html.= '   <tbody>';
+                foreach($list_schedules as $value){
+                    $i = $i + 1;
+    $html.= '       <tr src="schedule-report">';
+    $html.= '           <td>'.$value['user'].'</td><input name="hdId" type="hidden" value="'.$value['id'].'"/>';
+    $html.= '           <td>'.$value['date'].'</td>';
+    $html.= '           <td>'.$value['month'].'</td>';
+    $html.= '           <td>'.$value['day'].'</td>';
+    $html.= '           <td><a href="#myModalHours" role="button" class="btn btn-link" data-toggle="modal" id="aHours">'.$value['hours'].'</a></td>';
+    $html.= '       </tr>';
+                }
+    $html.= '   </tbody>';
+    $html.= '</table>';
+
+    $data['html'] = $html;
+    $data['count'] = $i;
+
+    echo json_encode($data);               
+}
+
+function getLessonsByStatUserDate($idStatus,$idUsers,$dtStart,$dtEnd,$idCountry){
+
+    $country = new country();
+    $country->open($idCountry);
+
+    $users = "";
+    foreach($idUsers as $u) {
+        $users .= $u.",";
+    }
+    $users = substr($users, 0, -1);
+
+    $lesson = new lesson();
+    $data = array();
+    $i = 0;
+
+    $list_lessons = $lesson->getByStatUserDate($idStatus,$users,$dtStart,$dtEnd);
+    $html.= '<table id="datatables" class="table table-bordered table-striped responsive">';
+    $html.= '   <thead>';
+    $html.= '       <tr>';
+    $html.= '           <th class="head0">Date</th>';
+    $html.= '           <th class="head1">User</th>';
+    $html.= '           <th class="head0">Client</th>';
+    $html.= '           <th class="head1">Discipline</th>';
+    $html.= '           <th class="head0">Hours</th>';
+    $html.= '           <th class="head1">Gross Value</th>';
+    $html.= '           <th class="head0">Discount Value</th>';
+    $html.= '           <th class="head1">Total Value</th>';
+    $html.= '           <th class="head0">Evaluation</th>';
+    $html.= '       </tr>';
+    $html.= '   </thead>';
+    $html.= '   <tbody>';
+                foreach($list_lessons as $value){
+                    $i = $i + 1;
+    $html.= '       <tr src="lesson-report">';
+    $html.= '           <td>'.$value['date'].'</td>';
+    $html.= '           <td>'.$value['user'].'</td><input name="hdId" type="hidden" value="'.$value['id'].'"/><input name="hdIdMob" type="hidden" value="'.$value['fk_mobile'].'"/><input name="hdIdCli" type="hidden" value="'.$value['fk_client'].'"/>';
+    $html.= '           <td>'.$value['client'].'</td>';
+    $html.= '           <td>'.$value['discipline'].'</td>';
+    $html.= '           <td><a href="#myModalHours" role="button" class="btn btn-link" data-toggle="modal" id="aHours">'.$value['hours'].'</a></td>';
+    $html.= '           <td>('.$country->currency.') '.$value['value_wo_discount'].'</td>';
+    $html.= '           <td>('.$country->currency.') '.$value['value_discount'].'</td>';
+    $html.= '           <td>('.$country->currency.') '.$value['value_total'].'</td>';
+    if($value->evaluation > 0){
+        $html.= '           <td><a href="#myModalEval" role="button" class="btn btn-link" data-toggle="modal" id="aEval">See</a></td>';
+    }else{
+        $html.= '           <td>Not evaluated</td>';
+    }
+    $html.= '       </tr>';
+                }
+    $html.= '   </tbody>';
+    $html.= '</table>';
+
+    $data['html'] = $html;
+    $data['count'] = $i;
+
+    echo json_encode($data);               
 }
 
 

@@ -82,7 +82,6 @@ class schedule
                     array_push($this->hours,$value['interval']);
                 }
             }
-
             return true;
         }
     }
@@ -171,6 +170,13 @@ class schedule
 
         return $objReturn;
     }
+
+    function getByUserDate($idUsers,$dtStart,$dtEnd)
+    {
+        return $query = $this->con->genericQuery("select s._id as id, u.name as user, DATE_FORMAT(s.date,'%d/%m/%Y') as date, MONTHNAME(s.date) as month, DAYNAME(s.date) as day, COUNT(s._id) AS hours from " . $this->table . " s inner join users u on s.fk_user = u._id inner join schedule_details sd on s._id = sd.fk_schedule where s.fk_user in ({$idUsers}) and (s.date between STR_TO_DATE(  '".$dtStart."',  '%d-%m-%Y' ) and STR_TO_DATE(  '".$dtEnd."',  '%d-%m-%Y' )) group by s.fk_user, s.date");
+    }
+
+    
 
 
 }

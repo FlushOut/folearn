@@ -80,4 +80,10 @@ class lesson
     {
         return $query = $this->con->genericQuery("select CONCAT(`start`, ' - ', `end`) as `interval` from lesson_details where fk_client = ".$fk_client. " and fk_lesson = ".$fk_lesson);        
     }
+
+    function getByStatUserDate($idStatus,$idUsers,$dtStart,$dtEnd)
+    {
+        return $query = $this->con->genericQuery("select l._id as id, l.fk_mobile, l.fk_client, DATE_FORMAT( l.date,  '%d/%m/%Y' ) as date, u.name as user, c.name as client, d.description as discipline, l.hours, l.value_wo_discount, l.value_discount, l.value_total, IFNULL(e._id,0) as evaluation from " . $this->table . " l inner join users u on l.fk_user = u._id inner join clients c on l.fk_client = c._id inner join disciplines d on l.fk_discipline = d._id left join lesson_evaluations e on l.fk_mobile = e.fk_lesson and l.fk_client = e.fk_client where l.fk_less_stat = ".$idStatus." and l.fk_user in ({$idUsers}) and (l.date between STR_TO_DATE(  '".$dtStart."',  '%d-%m-%Y' ) and STR_TO_DATE(  '".$dtEnd."',  '%d-%m-%Y' ))");
+    }
+    
 }
