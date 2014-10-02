@@ -26,5 +26,31 @@ class dashboard
 
         return "$d/$m/$Y at $G:$i:$s";
     }
+
+    function sendEmail($fromName, $fromEmail, $to, $subject, $body)
+    {   
+
+
+        $headers = "From: $fromName $fromEmail\r\n";
+        $headers .= "X-Mailer: PHP5\n";
+        $headers .= 'MIME-Version: 1.0' . "\n";
+        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+
+        if (mail($to,$subject,$body,$headers)){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function getTopUsersByCompany($fk_company)
+    {
+        return $query = $this->con->genericQuery("select u.name as user, ur.average, ur.quantity from user_rankings ur inner join users u on ur.fk_user = u._id where u.fk_company =".$fk_company."  and (ur.average <= 3.4) order by ur.average ASC, ur.quantity DESC LIMIT 5");
+    }
+
+    function getBadUsersByCompany($fk_company)
+    {
+        return $query = $this->con->genericQuery("select u.name as user, ur.average, ur.quantity from user_rankings ur inner join users u on ur.fk_user = u._id where u.fk_company =".$fk_company."  and (ur.average >= 3.5) order by ur.average DESC, ur.quantity DESC LIMIT 5");
+    }
 }
 

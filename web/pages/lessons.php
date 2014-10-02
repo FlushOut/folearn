@@ -175,7 +175,7 @@ if($lessRej){
                                             <table id="datatables" class="table table-bordered table-striped responsive">
                                                 <thead>
                                                     <tr>
-                                                        <th class="head0">Id</th>
+                                                        <th class="head0">#</th>
                                                         <th class="head1">Date</th>
                                                         <th class="head0">Client</th>
                                                         <th class="head1">Discipline</th>

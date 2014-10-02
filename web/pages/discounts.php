@@ -239,7 +239,7 @@ if($discDel){
                                             <table id="datatables" class="table table-bordered table-striped responsive">
                                                 <thead>
                                                     <tr>
-                                                        <th class="head0">Id</th>
+                                                        <th class="head0">#</th>
                                                         <th class="head1">Code</th>
                                                         <th class="head0">Percent</th>
                                                         <th class="head1">Condition Start (<?php echo $country->currency; ?>)</th>

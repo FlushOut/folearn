@@ -76,14 +76,49 @@ class lesson
         return $objReturn;
     }
 
+    function list_last_pend_lessons($fk_user)
+    {
+        $query = $this->con->genericQuery("select l._id,fk_mobile, l.fk_client, DATE_FORMAT( l.date,  '%d/%m/%Y' ) as date, c.name as client, d.description as discipline, l.hours, l.currency, l.value_wo_discount, l.value_discount, l.value_total from " . $this->table . " l inner join disciplines d on l.fk_discipline = d._id inner join clients c on l.fk_client = c._id where fk_user = ".$fk_user." and fk_less_stat = 1 order by date LIMIT 3");
+
+        $objReturn = array();
+
+        foreach ($query as $value) {
+            $less = new lesson();
+            $less->open($value);
+            $objReturn[] = $less;
+        }
+
+        return $objReturn;
+    }
+
     function list_lesson_details($fk_client, $fk_lesson)
     {
         return $query = $this->con->genericQuery("select CONCAT(`start`, ' - ', `end`) as `interval` from lesson_details where fk_client = ".$fk_client. " and fk_lesson = ".$fk_lesson);        
     }
 
+    function list_lesson_evaluation($fk_client, $fk_lesson)
+    {
+        return $query = $this->con->genericQuery("select IFNULL(re.description,'') as reason, IFNULL(ra.description,'') as rating, le.observations from lesson_evaluations le left join lesson_ratings ra on le.fk_rating = ra._id left join lesson_reasons re on le.fk_reason = re._id where le.fk_client = ".$fk_client. " and le.fk_lesson = ".$fk_lesson);        
+    }
+
     function getByStatUserDate($idStatus,$idUsers,$dtStart,$dtEnd)
     {
         return $query = $this->con->genericQuery("select l._id as id, l.fk_mobile, l.fk_client, DATE_FORMAT( l.date,  '%d/%m/%Y' ) as date, u.name as user, c.name as client, d.description as discipline, l.hours, l.value_wo_discount, l.value_discount, l.value_total, IFNULL(e._id,0) as evaluation from " . $this->table . " l inner join users u on l.fk_user = u._id inner join clients c on l.fk_client = c._id inner join disciplines d on l.fk_discipline = d._id left join lesson_evaluations e on l.fk_mobile = e.fk_lesson and l.fk_client = e.fk_client where l.fk_less_stat = ".$idStatus." and l.fk_user in ({$idUsers}) and (l.date between STR_TO_DATE(  '".$dtStart."',  '%d-%m-%Y' ) and STR_TO_DATE(  '".$dtEnd."',  '%d-%m-%Y' ))");
+    }
+
+    function getApprLessByIdMonth($idUser,$month)
+    {
+        $query = $this->con->genericQuery("select l._id,fk_mobile, l.fk_client, DATE_FORMAT( l.date,  '%d/%m/%Y' ) as date, c.name as client, d.description as discipline, l.hours, l.currency, l.value_wo_discount, l.value_discount, l.value_total from " . $this->table . " l inner join disciplines d on l.fk_discipline = d._id inner join clients c on l.fk_client = c._id where fk_user = ".$idUser." and MONTH(date)='".$month."' and fk_less_stat = 2");
+
+        $objReturn = array();
+
+        foreach ($query as $value) {
+            $less = new lesson();
+            $less->open($value);
+            $objReturn[] = $less;
+        }
+
+        return $objReturn;
     }
     
 }

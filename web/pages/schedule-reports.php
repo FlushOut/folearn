@@ -44,7 +44,23 @@ $list_users = $user->list_users($company->id);
           <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
         <![endif]-->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head>
-
+    <style type="text/css">
+        #column1-wrap {
+            float: left;
+            width: 100%;
+        }
+        #column1 {
+            margin-right: 200px;
+        }
+        #column2 {
+            float: left;
+            width: 200px;
+            margin-left: -200px;
+        }
+        #clear {
+            clear: both;
+        }
+    </style>
     <body>
         <!-- start header -->
         <?php include("../includes/_header.php"); ?>
@@ -83,6 +99,27 @@ $list_users = $user->list_users($company->id);
                             <div name="noInfo" class="alert" style="display:none">
                                 <button type="button" class="close" data-dismiss="alert">×</button>
                                 <strong>Info!</strong> You no have information
+                            </div>
+                            <!-- Modal Schedule Details-->
+                            <div id="myModalScheduleDetails" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                    <h3 id="myModalLabel">Hours</h3>
+                                </div>
+                                <div class="modal-body">
+                                    <form class="form-horizontal" id="form-validate" action="" method="post" />
+                                        <input name="hdIdUser" id="hdIdUser" type="hidden"/>
+                                        <input name="hdIdAct" id="hdIdAct" type="hidden"/>
+                                        <input name="hdDate" id="hdDate" type="hidden"/>
+                                        <div class="control-group">
+                                            <div id="dvHours" class="controls" style="margin-left: 100px !important;">
+                                            </div>
+                                        </div>
+                                        <p align="center">
+                                        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                                        </p>
+                                    </form>
+                                </div>
                             </div>
                             <div class="row-fluid">
                                 <div class="span12">
@@ -200,43 +237,12 @@ $list_users = $user->list_users($company->id);
                 // select2
                 $('[data-form=select2]').select2();
 
+                jQuery("label.checkbox").each(function () {
+                if (jQuery("input", this).attr("checked") == 'checked') jQuery(this).addClass("checked");
+                });
+
                 // datepicker
                 $('[data-form=datepicker]').datepicker({format:'dd-mm-yyyy'});
-                
-                // datatables
-                $('#datatables').dataTable( {
-                    "bDestroy": true,
-                    "sDom": "<'row-fluid'<'span6'l><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
-                    "sPaginationType": "bootstrap",
-                    "oLanguage": {
-                            "sLengthMenu": "_MENU_ records per page"
-                    }
-                });
-                
-                // datatables table tools
-                $('#datatablestools').dataTable({
-                    "sDom": "<'row-fluid'<'span6'T><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
-                    "oTableTools": {
-                        "aButtons": [
-                            "copy",
-                            "print",
-                            {
-                                "sExtends":    "collection",
-                                "sButtonText": 'Save <span class="caret" />',
-                                "aButtons":    [ 
-                                    "xls", 
-                                    "csv",
-                                    {
-                                        "sExtends": "pdf",
-                                        "sPdfOrientation": "landscape",
-                                        "sPdfMessage": "Your custom message would go here."
-                                    }
-                                ]
-                            }
-                        ],
-                        "sSwfPath": "../js/datatables/swf/copy_csv_xls_pdf.swf"
-                    }
-                });
 
                 var d = new Date();
                 var year = d.getFullYear();
@@ -262,6 +268,7 @@ $list_users = $user->list_users($company->id);
                     }).done(function (resp) {
                         var data = jQuery.parseJSON(resp);
                         $("#datatables").html(data.html);
+                        loadControls();
                         if(data.count <= 0){
                             $("[name=noInfo]").css("display","block");
                             window.setTimeout(function() {
@@ -277,6 +284,71 @@ $list_users = $user->list_users($company->id);
                 $("#btnClearUsers").click(function () {
                     $("#datatables").val('').trigger("change");
                 });
+
+                function loadControls(){
+                    //Lesson Details
+                    $('a#aHours').bind('click',function(){
+                        $("#dvHours").html('Loanding...');
+                        jQuery(this).parents('tr').map(function () {
+                            var id = jQuery('input[name="hdId"]', this).val();
+                            var dtwoformat = jQuery('input[name="hdDate"]', this).val();
+                            var d = dtwoformat.substr(0,2);
+                            var m =  dtwoformat.substr(3,2);
+                            var y = dtwoformat.substr(6,4);
+
+                            var dt = y+'-'+m+'-'+d;
+                            var action = "getScheduleDetails";
+
+                            console.log('id' + id);
+                            console.log('dt' + dt);
+                            jQuery.ajax({
+                                url: "/ajax/actions.php",
+                                type: "POST",
+                                data: {id: id, dt: dt, action: action }
+                            }).done(function (resp) {
+                                    var data = jQuery.parseJSON(resp);
+                                    $("#dvHours").html(data.html);
+                                    $("#dvHours :input").attr('disabled', true);
+                                });
+                        });
+                        return true;
+                    });
+                    // datatables
+                    $('#datatables').dataTable( {
+                        "bDestroy": true,
+                        "sDom": "<'row-fluid'<'span6'l><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
+                        "sPaginationType": "bootstrap",
+                        "oLanguage": {
+                                "sLengthMenu": "_MENU_ records per page"
+                        }
+                    });
+                    
+                    // datatables table tools
+                    $('#datatablestools').dataTable({
+                        "bDestroy": true,
+                        "sDom": "<'row-fluid'<'span6'T><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
+                        "oTableTools": {
+                            "aButtons": [
+                                "copy",
+                                "print",
+                                {
+                                    "sExtends":    "collection",
+                                    "sButtonText": 'Save <span class="caret" />',
+                                    "aButtons":    [ 
+                                        "xls", 
+                                        "csv",
+                                        {
+                                            "sExtends": "pdf",
+                                            "sPdfOrientation": "landscape",
+                                            "sPdfMessage": "Your custom message would go here."
+                                        }
+                                    ]
+                                }
+                            ],
+                            "sSwfPath": "../js/datatables/swf/copy_csv_xls_pdf.swf"
+                        }
+                    });
+                }
 
             });
       

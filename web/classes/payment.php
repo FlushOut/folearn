@@ -108,6 +108,5 @@ class payment
         }
 
         return $objReturn;
-
-    }    
+    }
 }

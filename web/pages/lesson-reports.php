@@ -87,6 +87,30 @@ $list_less_statuses = $lessstatus->list_less_statuses();
                                 <button type="button" class="close" data-dismiss="alert">×</button>
                                 <strong>Info!</strong> You no have information
                             </div>
+                            <!-- Modal Hours-->
+                            <div id="myModalHours" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 150px;margin-left: -90px;margin-top: 100px;">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                    <h3 id="myModalLabel">Hours</h3>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="control-group">
+                                        <div id="dvHours" class="controls">Loanding...</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Modal Evaluation-->
+                            <div id="myModalEval" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 300px;margin-left: -90px;margin-top: 100px;">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                    <h3 id="myModalLabel">Evaluation</h3>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="control-group">
+                                        <div id="dvEval" class="controls">Loanding...</div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="row-fluid">
                                 <div class="span12">
                                     <div class="box corner-all">
@@ -102,7 +126,7 @@ $list_less_statuses = $lessstatus->list_less_statuses();
                                                 <div class="controls form-inline" style="text-align:center;">
                                                     <label class="control-label" for="isStatuses">Statuses</label>
                                                     &nbsp;
-                                                    <select id="isStatuses" data-form="select2" style="width:200px;" data-placeholder="Select category...">
+                                                    <select id="isStatuses" data-form="select2" style="width:200px;" data-placeholder="Select status...">
                                                         <option value="-1"/>Select status...
                                                         <?php foreach ($list_less_statuses as $item) { ?>
                                                         <option value="<?php echo $item->id; ?>"/><?php echo $item->description; ?>
@@ -225,40 +249,6 @@ $list_less_statuses = $lessstatus->list_less_statuses();
 
                 // datepicker
                 $('[data-form=datepicker]').datepicker({format:'dd-mm-yyyy'});
-                
-                // datatables
-                $('#datatables').dataTable( {
-                    "sDom": "<'row-fluid'<'span6'l><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
-                    "sPaginationType": "bootstrap",
-                    "oLanguage": {
-                            "sLengthMenu": "_MENU_ records per page"
-                    }
-                });
-                
-                // datatables table tools
-                $('#datatablestools').dataTable({
-                    "sDom": "<'row-fluid'<'span6'T><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
-                    "oTableTools": {
-                        "aButtons": [
-                            "copy",
-                            "print",
-                            {
-                                "sExtends":    "collection",
-                                "sButtonText": 'Save <span class="caret" />',
-                                "aButtons":    [ 
-                                    "xls", 
-                                    "csv",
-                                    {
-                                        "sExtends": "pdf",
-                                        "sPdfOrientation": "landscape",
-                                        "sPdfMessage": "Your custom message would go here."
-                                    }
-                                ]
-                            }
-                        ],
-                        "sSwfPath": "../js/datatables/swf/copy_csv_xls_pdf.swf"
-                    }
-                });
 
                 var d = new Date();
                 var year = d.getFullYear();
@@ -284,6 +274,7 @@ $list_less_statuses = $lessstatus->list_less_statuses();
                     }).done(function (resp) {
                         var data = jQuery.parseJSON(resp);
                         $("#datatables").html(data.html);
+                        loadControls();
                         if(data.count <= 0){
                             $("[name=noInfo]").css("display","block");
                             window.setTimeout(function() {
@@ -299,6 +290,80 @@ $list_less_statuses = $lessstatus->list_less_statuses();
                 $("#btnClearUsers").click(function () {
                     $("#ismUsers").val('').trigger("change");
                 });
+
+                function loadControls(){
+                    //Lesson Details
+                    $('a#aHours').bind('click',function(){
+                        $("#dvHours").html('Loanding...');
+                        jQuery(this).parents('tr').map(function () {
+                            var idCli = jQuery('input[name="hdIdCli"]', this).val();
+                            var idMob = jQuery('input[name="hdIdMob"]', this).val();
+                            var action = "getLessonDetails";
+
+                            jQuery.ajax({
+                                url: "/ajax/actions.php",
+                                type: "POST",
+                                data: {id: idCli, idMob:idMob , action: action }
+                            }).done(function (resp) {
+                                    $("#dvHours").html(resp);
+                                });
+                        });
+                        return true;
+                    });
+                    //Lesson Evaluation
+                    $('a#aEval').bind('click',function(){
+                        $("#dvEval").html('Loanding...');
+                        jQuery(this).parents('tr').map(function () {
+                            var idCli = jQuery('input[name="hdIdCli"]', this).val();
+                            var idMob = jQuery('input[name="hdIdMob"]', this).val();
+                            var action = "getLessonEvaluation";
+
+                            jQuery.ajax({
+                                url: "/ajax/actions.php",
+                                type: "POST",
+                                data: {id: idCli, idMob:idMob , action: action }
+                            }).done(function (resp) {
+                                    $("#dvEval").html(resp);
+                                });
+                        });
+                        return true;
+                    }); 
+                    // datatables
+                    $('#datatables').dataTable( {
+                        "bDestroy": true,
+                        "sDom": "<'row-fluid'<'span6'l><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
+                        "sPaginationType": "bootstrap",
+                        "oLanguage": {
+                                "sLengthMenu": "_MENU_ records per page"
+                        }
+                    });
+                    
+                    // datatables table tools
+                    $('#datatablestools').dataTable({
+                        "bDestroy": true,
+                        "sDom": "<'row-fluid'<'span6'T><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
+                        "oTableTools": {
+                            "aButtons": [
+                                "copy",
+                                "print",
+                                {
+                                    "sExtends":    "collection",
+                                    "sButtonText": 'Save <span class="caret" />',
+                                    "aButtons":    [ 
+                                        "xls", 
+                                        "csv",
+                                        {
+                                            "sExtends": "pdf",
+                                            "sPdfOrientation": "landscape",
+                                            "sPdfMessage": "Your custom message would go here."
+                                        }
+                                    ]
+                                }
+                            ],
+                            "sSwfPath": "../js/datatables/swf/copy_csv_xls_pdf.swf"
+                        }
+                    });
+                }
 
             });
       

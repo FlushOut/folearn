@@ -24,11 +24,23 @@ switch ($_POST['action']) {
     case 'getLessonDetails':
         getLessonDetails($id,$idMob);
         break;
+    case 'getLessonEvaluation':
+        getLessonEvaluation($id,$idMob);
+        break;
     case 'getSchedulesByUserDate':
         getSchedulesByUserDate($idUsers,$dtStart,$dtEnd);
         break;
     case 'getLessonsByStatUserDate':
         getLessonsByStatUserDate($id,$idUsers,$dtStart,$dtEnd,$company->fk_country);
+        break;
+    case 'showInvoices':
+        showInvoices($company->id,$dtStart,$dtEnd,$company->fk_country);
+        break;
+    case 'getDashboardAccountStat':
+        getDashboardAccountStat($company->id);
+        break;
+    case 'getApprLessByIdMonth':
+        getApprLessByIdMonth($id,$dt);
         break;
 	default:
         # code...
@@ -196,10 +208,10 @@ function getSchedulesByUserDate($idUsers,$dtStart,$dtEnd){
                     $i = $i + 1;
     $html.= '       <tr src="schedule-report">';
     $html.= '           <td>'.$value['user'].'</td><input name="hdId" type="hidden" value="'.$value['id'].'"/>';
-    $html.= '           <td>'.$value['date'].'</td>';
+    $html.= '           <td>'.$value['date'].'</td><input name="hdDate" type="hidden" value="'.$value['date'].'"/>';
     $html.= '           <td>'.$value['month'].'</td>';
     $html.= '           <td>'.$value['day'].'</td>';
-    $html.= '           <td><a href="#myModalHours" role="button" class="btn btn-link" data-toggle="modal" id="aHours">'.$value['hours'].'</a></td>';
+    $html.= '           <td><a href="#myModalScheduleDetails" role="button" class="btn btn-link" data-toggle="modal" id="aHours">'.$value['hours'].'</a></td>';
     $html.= '       </tr>';
                 }
     $html.= '   </tbody>';
@@ -253,7 +265,7 @@ function getLessonsByStatUserDate($idStatus,$idUsers,$dtStart,$dtEnd,$idCountry)
     $html.= '           <td>('.$country->currency.') '.$value['value_wo_discount'].'</td>';
     $html.= '           <td>('.$country->currency.') '.$value['value_discount'].'</td>';
     $html.= '           <td>('.$country->currency.') '.$value['value_total'].'</td>';
-    if($value->evaluation > 0){
+    if($value['evaluation'] > 0){
         $html.= '           <td><a href="#myModalEval" role="button" class="btn btn-link" data-toggle="modal" id="aEval">See</a></td>';
     }else{
         $html.= '           <td>Not evaluated</td>';
@@ -268,6 +280,87 @@ function getLessonsByStatUserDate($idStatus,$idUsers,$dtStart,$dtEnd,$idCountry)
 
     echo json_encode($data);               
 }
+
+function getLessonEvaluation($idCli,$idMob){
+    $lesson = new lesson();
+    $html = "";
+    $list_lesson_evaluation = $lesson->list_lesson_evaluation($idCli,$idMob);
+    foreach ($list_lesson_evaluation as $item) {
+        if(strlen($item['reason'])>0){
+            $html.= '<label class="control-label">';
+            $html.= '<b>•&nbsp;Reason:</b>&nbsp;&nbsp;&nbsp;'.$item['reason'];
+            $html.= '</label>';    
+        }else if(strlen($item['rating'])>0){
+            $html.= '<label class="control-label">';
+            $html.= '<b>•&nbsp;Rating:</b>&nbsp;&nbsp;&nbsp;'.$item['rating'];
+            $html.= '</label>';
+        }
+        $html.= '<label class="control-label">';
+        $html.= '<b>•&nbsp;Observations:</b>';
+        $html.= '</label>';
+        $html.= '<label class="control-label">';
+        $html.= $item['observations'];
+        $html.= '</label>';
+    }
+    echo $html;
+}
+
+function showInvoices($fk_company,$dtStart,$dtEnd,$idCountry){
+
+    $country = new country();
+    $country->open($idCountry);
+
+    $pay = new payment();
+    $data = array();
+    $i = 0;
+
+    $list_invoices = $pay->getByDate($fk_company,$dtStart,$dtEnd);
+    $html.= '<table id="datatables" class="table table-bordered table-striped responsive">';
+    $html.= '   <thead>';
+    $html.= '       <tr>';
+    $html.= '           <th class="head0">#</th>';
+    $html.= '           <th class="head1">Date Start</th>';
+    $html.= '           <th class="head0">Date End</th>';
+    $html.= '           <th class="head1">Lessons</th>';
+    $html.= '           <th class="head0">Invoice</th>';
+    $html.= '           <th class="head1">Actions</th>';
+    $html.= '       </tr>';
+    $html.= '   </thead>';
+    $html.= '   <tbody>';
+                foreach($list_invoices as $value){
+                    $i = $i + 1;
+    $html.= '       <tr src="stays">';
+    $html.= '           <td>'.$value->sequence.'</td>';
+    $html.= '           <td>'.date('Y-m-d', strtotime($value->date_start)).'</td>';
+    $html.= '           <td>'.date('Y-m-d', strtotime($value->date_end)).'</td>';
+    $html.= '           <td>'.$value->lessons.'</td>';
+    $html.= '           <td>('.$country->currency.') '.$value->invoice.'</td>';
+    $html.= '           <td><a href="/pages/invoice-detail.php?id='.$value->id.'" role="button" class="btn btn-link">View</a></td>';
+    $html.= '       </tr>';
+                }
+    $html.= '   </tbody>';
+    $html.= '</table>';
+
+    $data['html'] = $html;
+    $data['count'] = $i;
+
+    echo json_encode($data);
+}
+
+function getDashboardAccountStat($fk_company){
+    $data = array();
+    $payment = new payment();
+    $data = $payment->getDashboardAccountStat($fk_company);
+    echo json_encode($data);
+}
+
+function getApprLessByIdMonth($idUser,$month){
+    $lesson = new lesson();
+    $data['lesson'] = $lesson->getApprLessByIdMonth($idUser,$month);
+
+    echo json_encode($data);
+}
+
 
 
 

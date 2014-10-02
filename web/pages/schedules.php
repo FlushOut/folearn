@@ -365,7 +365,7 @@ if($scheDel){
                         type: "POST",
                         data: {id: id, dt: check, action: action }
                             }).done(function (resp) {
-                                var data = jQuery.parseJSON(resp);
+                                    var data = jQuery.parseJSON(resp);
                                     $(".controls").html(data.html);
                                     if(check < today) {
                                         $(".controls :input").attr('disabled', true);
@@ -379,8 +379,7 @@ if($scheDel){
                                             $("#btnSave").text('Save');
                                             $("#btnSave").show();
                                         }    
-                                    }
-                                    
+                                    }   
                                 });
                         calendar.fullCalendar('unselect');
                     },

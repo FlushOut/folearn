@@ -60,34 +60,6 @@ if (isset($_POST['name'])) {
     }
 }
 
-if($errorUserPass){
-    echo '<style type="text/css">
-        div[name=errorUserPass] {
-            display: block !important;
-        }
-        </style>';
-}else{
-    echo '<style type="text/css">
-        div[name=errorUserPass] {
-            display: none !important;
-        }
-        </style>';
-}
-
-if($errorPayment){
-    echo '<style type="text/css">
-        div[name=errorPayment] {
-            display: block !important;
-        }
-        </style>';
-}else{
-    echo '<style type="text/css">
-        div[name=errorPayment] {
-            display: none !important;
-        }
-        </style>';
-}
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -122,6 +94,35 @@ if($errorPayment){
           <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
         <![endif]-->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head>
+    <?php
+    if($errorUserPass){
+    echo '<style type="text/css">
+        div[name=errorUserPass] {
+            display: block !important;
+        }
+        </style>';
+    }else{
+        echo '<style type="text/css">
+            div[name=errorUserPass] {
+                display: none !important;
+            }
+            </style>';
+    }
+
+    if($errorPayment){
+        echo '<style type="text/css">
+            div[name=errorPayment] {
+                display: block !important;
+            }
+            </style>';
+    }else{
+        echo '<style type="text/css">
+            div[name=errorPayment] {
+                display: none !important;
+            }
+            </style>';
+    }
+    ?>
     <body>
         <!-- section header -->
         <header class="header" data-spy="affix" data-offset-top="0">

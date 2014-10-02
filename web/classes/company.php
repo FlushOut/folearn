@@ -31,7 +31,7 @@ class company
             $this->fk_country = $query[0]['fk_country'];
             $this->name = $query[0]['name'];
             $this->logo = $query[0]['logo'];
-            $this->logo_type = $query[0]['logo_type'];
+            $this->logo_type = $query[0]['logotype'];
             $this->status = $query[0]['status'];
             $this->status_payment = $query[0]['status_payment'];
 
@@ -48,10 +48,10 @@ class company
 
         $dados["name"] = $name;
         $dados["logo"] = $fotoFinal;
-        $dados["logo_type"] = $type;
+        $dados["logotype"] = $type;
         
         if ($this->id > 0) {
-            $dados["id"] = $this->id;
+            $dados["_id"] = $this->id;
             return $this->con->update($this->table,$dados);
         } else {
             return $this->con->insert($this->table,$dados);

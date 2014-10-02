@@ -67,7 +67,7 @@ if ($_POST['action'] == 'SaveCompany') {
                                     <li class="dropdown-footer">
                                         <div>
                                             <a class="btn btn-small pull-right" href="/pages/logout.php">Logout</a>
-                                            <a class="btn btn-small" href="/pages/users.php">Add user</a>
+                                            <a class="btn btn-small" style="visibility:hidden;" href="#"></a>
                                         </div>
                                     </li>
                                 </ul>
@@ -79,7 +79,7 @@ if ($_POST['action'] == 'SaveCompany') {
         </header>
 
         <!-- Modal-->
-        <div id="myModalConfiguration" style="height:550px;" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div id="myModalConfiguration" style="height: 200px; width: 350px; margin-left:-180px;" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                 <h3>Company</h3>
@@ -119,6 +119,6 @@ if ($_POST['action'] == 'SaveCompany') {
 
         <script type="text/javascript">
             $(document).ready(function() {
-                $('#form-validate-company').validate();
+                //$('#form-validate-company').validate();
             })
         </script>
