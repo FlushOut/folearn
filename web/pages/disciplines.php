@@ -5,14 +5,21 @@ $discAdd = false;
 $discUpd = false;
 $discDel = false;
 
+
+if (!$_GET['user'])
+    die();
+else
+    $idUser = $_GET['user'];
+
 $country = new country();
 $country->open($company->fk_country);
 
 $newUser = new user();
+$newUser->open($idUser);
 
 if ($_POST['action'] == 'Save') {
     if (isset($_POST['hdId'])) {
-        $newUser->saveDiscplines($_POST['hdId'],$_POST['discPrice']);
+        $newUser->saveDiscplines($_POST['hdId'],$_POST['discPrices']);
         $discUpd = true;
     }
 }
@@ -23,7 +30,7 @@ if ($_POST['action'] == 'Save') {
     <head>
         <meta charset="utf-8" />
         <link rel="shortcut icon" href="../img/icon.png">
-        <title>Dashboard | FOLearn</title>
+        <title>Disciplines | FOLearn</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="description" content="" />
         <meta name="author" content="stilearning" />
@@ -129,38 +136,47 @@ if($discDel){
                             </ul><!--/breadcrumb-->
                         </div><!-- /content-breadcrumb -->
                         <!-- Modal Price-->
-                        <div id="myModalPrice" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 320px;">
+                        <div id="myModalPrice" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 380px;">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                <h3 id="myModalLabel">Price for Hour</h3>
+                                <h3 id="myModalLabel">Price for Hour (<? echo $country->currency ?>)</h3>
                             </div>
                             <div class="modal-body">
-                                    <table>
-                                        <tr>
-                                            <td>Price (<? echo $country->currency ?>) </td>
-                                            <td>
-                                                <input name="hdPrice" id="hdPrice" type="hidden"/>
-                                                <input type="text" class="grd-white input-medium" onKeyPress="return soloNumeros(event)" id="price" name="price" />
-                                            </td>    
-                                        </tr>
-                                        <tr>
-                                            <td></td>
-                                            <td><button class="btn" id="btnClose">Close</button>
-                                            <button class="btn btn-primary" id="btnSave">Save</button></td>
-                                        </tr>
-                                    </table>
+                                <form class="form-horizontal" />
+                                    <div class="control-group">
+                                        <label class="control-label" for="price_user">Price for User:</label>
+                                        <div class="controls">
+                                            <input name="hdPriceUser" id="hdPriceUser" type="hidden"/>
+                                            <input type="text" class="grd-white input-medium" onKeyPress="return soloNumeros(event)" id="price_user" name="price_user" />
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label" for="price_company">Price for Company:</label>
+                                        <div class="controls">
+                                            <input name="hdPriceCompany" id="hdPriceCompany" type="hidden"/>
+                                            <input type="text" class="grd-white input-medium" onKeyPress="return soloNumeros(event)" id="price_company" name="price_company" />
+                                        </div>
+                                    </div>
                                 </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                                <button class="btn btn-primary" id="btnSave">Save</button>
                             </div>
                         </div>
                         <!-- content-body -->
                         <div class="content-body">
+                            <div name="discUpdated" class="alert alert-success">
+                                <button type="button" class="close" data-dismiss="alert">×</button>
+                                <strong>Done!</strong> Your disciplines was updated
+                            </div>
                             <form class="form-horizontal" action="" method="post" />
                                 <div class="row-fluid" style="display: inline-flex;">
-                                    <input name="hdId" type="hidden" value="<?php echo $user->id; ?>"/>
+                                    <input name="hdId" type="hidden" value="<?php echo $idUser ?>"/>
                                     <div class="span9">
                                         <!--box tab-->
                                         <div class="box-tab corner-all">
-                                            <legend>Select the disciplines that you teach:</legend>
+                                            <legend>Select the disciplines that <b><?php echo $newUser->name; ?></b> teach:</legend>
                                             <div class="tabbable tabs-left" id="dvDiscplines">
                                                 <h4 style="text-align:center">Loanding...</h4>
                                             </div>
@@ -228,12 +244,13 @@ if($discDel){
                 var lbl = null;
                 var ipt = null;
                 var blnSave = false;
-                $("input:checkbox[name='discPrice[]']").live("change", function () {
+                $("input:checkbox[name='discPrices[]']").live("change", function () {
                     blnSave = false;
                     lbl = $(this).parent("label");
                     ipt = $(this);
                     if ($(this).is(':checked')) {
-                        $('#price').val('');
+                        $('#price_user').val('');
+                        $('#price_company').val('');
                         $('#myModalPrice').modal('show');
                     } else {
                         var discTxt = null;
@@ -248,11 +265,11 @@ if($discDel){
 
                 $('#btnSave').bind('click',function(){
                     blnSave = true;
-                    if($('#price').val().trim().length > 0){
+                    if($('#price_user').val().trim().length > 0 && $('#price_company').val().trim().length > 0){
                         var discTxt = null;
                         var discVal = null;
-                        discTxt = lbl.text()+' -  ('+currency+') '+$('#price').val();
-                        discVal = ipt.val()+' - '+$('#price').val();
+                        discTxt = lbl.text()+' -  ('+currency+') '+$('#price_user').val()+'/'+$('#price_company').val();
+                        discVal = ipt.val()+' - '+$('#price_user').val()+'/'+$('#price_company').val();
                         ipt.val(discVal);
                         lbl.html(discTxt);
                         lbl.append(ipt);
@@ -264,22 +281,23 @@ if($discDel){
 
                 $('#btnClose').bind('click',function() {
                     blnSave = false;
-                    $('#price').val('');
+                    $('#price_user').val('');
+                    $('#price_company').val('');
                     ipt.attr('checked', false);
                     $('#myModalPrice').modal('hide');
                 });
                 $('#myModalPrice').on('hide',function() {
-                    if($('#price').val().trim().length <= 0 || blnSave == false)
+                    if($('#price_user').val().trim().length <= 0 || $('#price_company').val().trim().length <= 0 || blnSave == false)
                         ipt.attr('checked', false);
                 }).on('hidden', function() {
-                    if($('#price').val().trim().length <= 0 || blnSave == false)
+                    if($('#price_user').val().trim().length <= 0 || $('#price_company').val().trim().length <= 0 || blnSave == false)
                         ipt.attr('checked', false);
                 });
 
                 // uniform
                 $('[data-form=uniform]').uniform();
 
-                var idUser = <?php echo $_SESSION['loginsession'] ?>;
+                var idUser = <?php echo $idUser ?>;
                 var action = "getDisciplinesUser";
                 jQuery.ajax({
                     url: "/ajax/actions.php",

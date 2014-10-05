@@ -1,5 +1,6 @@
 <?php
 require_once("../config.php");
+verify_access($list_modules);
 
 ?>
 
@@ -101,22 +102,17 @@ require_once("../config.php");
                             <!-- Modal Schedule Details-->
                             <div id="myModalScheduleDetails" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                                 <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                                     <h3 id="myModalLabel">Hours</h3>
                                 </div>
                                 <div class="modal-body">
-                                    <form class="form-horizontal" id="form-validate" action="" method="post" />
-                                        <input name="hdIdUser" id="hdIdUser" type="hidden"/>
-                                        <input name="hdIdAct" id="hdIdAct" type="hidden"/>
-                                        <input name="hdDate" id="hdDate" type="hidden"/>
-                                        <div class="control-group">
-                                            <div id="dvHours" class="controls" style="margin-left: 100px !important;">
-                                            </div>
-                                        </div>
-                                        <p align="center">
-                                        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                                        </p>
-                                    </form>
+                                    <div class="control-group">
+                                        <input name="hdId" id="hdId" type="hidden"/>
+                                        <div id="dvHours" class="controls" style="margin-left: 100px !important;"></div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
                                 </div>
                             </div>
                             <div class="row-fluid">
@@ -280,20 +276,12 @@ require_once("../config.php");
                         $("#dvHours").html('Loanding...');
                         jQuery(this).parents('tr').map(function () {
                             var id = jQuery('input[name="hdId"]', this).val();
-                            var dtwoformat = jQuery('input[name="hdDate"]', this).val();
-                            var d = dtwoformat.substr(0,2);
-                            var m =  dtwoformat.substr(3,2);
-                            var y = dtwoformat.substr(6,4);
+                            var action = "getScheduleDetailsById";
 
-                            var dt = y+'-'+m+'-'+d;
-                            var action = "getScheduleDetails";
-
-                            console.log('id' + id);
-                            console.log('dt' + dt);
                             jQuery.ajax({
                                 url: "/ajax/actions.php",
                                 type: "POST",
-                                data: {id: id, dt: dt, action: action }
+                                data: {id: id, action: action }
                             }).done(function (resp) {
                                     var data = jQuery.parseJSON(resp);
                                     $("#dvHours").html(data.html);

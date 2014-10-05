@@ -20,6 +20,8 @@ class user
     public $phone;
     public $code_conf;
     public $status_conf;
+    public $code_pass;
+    public $status_pass;
     public $status;
 
     public $create_date;
@@ -70,11 +72,13 @@ class user
         else {
             $this->id = $query['_id'];
             $this->code_conf = $query['code_conf'];
+            $this->code_pass = $query['code_pass'];
             $this->name = $query['name'];
             $this->email = $query['email'];
             $this->phone = $query['phone'];
             $this->status = $query['status'];
             $this->status_conf = $query['status_conf'];
+            $this->status_pass = $query['status_pass'];
             $this->fk_company = $query['fk_company'];
 
             $this->create_date = $query['create_date'];
@@ -88,11 +92,11 @@ class user
             if (count($query_profiles) > 0) {
                 foreach ($query_profiles as $value) {
                     if($value['fk_profile'] == 2){
-                        $query_disciplines = $this->con->genericQuery("select CONCAT(`fk_discipline`, ' - ', `price`) as `disciplines_price` from user_disciplines 
+                        $query_disciplines = $this->con->genericQuery("select CONCAT(`fk_discipline`, ' - ', `price_user`, '/', `price_company`) as `disciplines_prices` from user_disciplines 
                                                         where fk_user = " . $this->id);
                         if (count($query_disciplines) > 0) {
                             foreach ($query_disciplines as $vdisc) {
-                                array_push($this->disciplines,$vdisc['disciplines_price']);
+                                array_push($this->disciplines,$vdisc['disciplines_prices']);
                             }
                         }
                     }
@@ -123,6 +127,27 @@ class user
         
     }
 
+    function saveMyUsers($fk_company, $name, $email, $phone)
+    {
+        $now = new DateTime();
+        $dadosS["fk_company"] = $fk_company;
+        if(strlen(rtrim($name))>0) $dadosS["name"] = addslashes($name);
+        if(strlen(rtrim($email))>0) $dadosS["email"] = addslashes($email);
+        if(strlen(rtrim($phone))>0) $dadosS["phone"] = addslashes($phone);
+        if(strlen(rtrim($password))>0) $dadosS["password"] = md5($password);
+        $dadosS["create_date"] = addslashes($now->format('Y-m-d H:i:s'));
+        $dadosS["status"] = 1;
+        if ($this->id > 0) {
+            $dadosS["_id"] = $this->id;
+            return $this->con->update($this->table,$dadosS);
+        } else {
+            $dadosS["status_conf"] = 1;
+            $dadosS["code_conf"] = 1234;
+            return $this->con->insert($this->table,$dadosS);
+        }
+        
+    }
+
     function saveProfiles($idUser, $profiles)
     {
         $query = "delete from user_profiles where fk_user=" . $idUser;
@@ -141,15 +166,16 @@ class user
         }   
     }
 
-    function saveDiscplines($idUser, $disciplines_price)
+    function saveDiscplines($idUser, $disciplines_prices)
     {
         $query = "delete from user_disciplines where fk_user=" . $idUser;
         $this->con->genericQuery($query);
         $first = true;
-        foreach ($disciplines_price as $value) {
-            list($discpline, $price) = split(' - ', $value);
-            $query = "insert into user_disciplines(fk_user,fk_discipline,price)
-                      values(".$idUser.",".$discpline.",".$price.")";
+        foreach ($disciplines_prices as $value) {
+            list($discpline, $prices) = split(' - ', $value);
+            list($price_user, $price_company) = split('/', $prices);
+            $query = "insert into user_disciplines(fk_user,fk_discipline,price_user,price_company)
+                      values(".$idUser.",".$discpline.",".$price_user.",".$price_company.")";
             $this->con->genericQuery($query);
         }   
     }
@@ -171,7 +197,11 @@ class user
 
     function del()
     {
-        $query = $this->con->genericQuery("delete from " . $this->table . " where _id=" . $this->id);
+        $query = "delete from user_profiles where fk_user=" . $this->id;
+        $this->con->genericQuery($query);
+
+        $query = "delete from " . $this->table . " where _id=" . $this->id;
+        $this->con->genericQuery($query);
     }
 
     function list_profiles()
@@ -190,6 +220,7 @@ class user
         $dadosC["create_date"] = addslashes($now->format('Y-m-d H:i:s'));
         $dadosC["status"] = 1;
         $dadosC["status_conf"] = 0;
+        $dadosC["status_pass"] = 1;
 
         $idUser = $this->con->insert($this->table,$dadosC);
         $admin = array(1); 
@@ -200,7 +231,7 @@ class user
 
     function vEmail($id, $code)
     {
-        $query = $this->con->genericQuery("select * from " . $this->table . " where _id=" . $id . " and code_conf=" . $code);
+        $query = $this->con->genericQuery("select * from " . $this->table . " where _id=" . $id . " and code_conf=" . $code . " and status_conf=0");
         if (count($query) == 0){
             return false;
         }else{
@@ -208,6 +239,31 @@ class user
             $dadosV["_id"] = $id;
             $dadosV["status_conf"] = 1;
             $up = $this->con->update($this->table,$dadosV);    
+            if($up > 0){
+                $objReturn = array();
+                foreach ($query as $value) {
+                    $user = new user();
+                    $user->open($value);
+                    $objReturn[] = $user;
+                }
+                return $objReturn[0];    
+            }else{
+                return false;
+            }
+        }
+    }
+
+    function resetPassword($id, $code, $password)
+    {
+        $query = $this->con->genericQuery("select * from " . $this->table . " where _id=" . $id . " and code_pass=" . $code . " and status_pass=0");
+        if (count($query) == 0){
+            return false;
+        }else{
+            $uv = NULL;
+            $dadosP["_id"] = $id;
+            $dadosP["status_pass"] = 1;
+            $dadosP["password"] = md5($password);
+            $up = $this->con->update($this->table,$dadosP);    
             if($up > 0){
                 $objReturn = array();
                 foreach ($query as $value) {
@@ -282,6 +338,146 @@ class user
             if (mail($email,$subject,$body,$headers)){
                 $dadosSE["_id"] = $idUser;
                 $dadosSE["code_conf"] = $code;
+                return $this->con->update($this->table,$dadosSE);        
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }   
+    }
+
+    function recoverPass($idUser, $email)
+    {   
+
+        $fromName = "FlushOut Contact";
+        $fromEmail = "contact@flushoutsolutions.com";
+        $code =  rand(1000,9999);
+
+        $headers = "From: $fromName $fromEmail\r\n";
+        $headers .= "X-Mailer: PHP5\n";
+        $headers .= 'MIME-Version: 1.0' . "\n";
+        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+         
+        $subject = "Reset Password";
+        $body = "<div marginheight='0' marginwidth='0' style='font-family:Helvetica Neue,Helvetica,Arial,sans-serif;line-height:21px;color:#404040'>";
+        $body .= "<div style='max-width:650px;margin:0 auto;padding:20px 0'>";
+        $body .= "<table width='100%' cellpadding='0' cellspacing='0' border='0' style='font-family:Helvetica,Arial;font-size:12px;color:#404040'>";
+        $body .= "  <tbody>";
+        $body .= "   <tr>";
+        $body .=    "  <td width=100%'>";   
+        $body .= "<table bgcolor='#FFFFFF' width='97%' cellpadding='0' cellspacing='0' border='0' align='center' style='border-radius:4px;font-family:Helvetica,Arial;font-size:12px;color:#404040;border:1px solid #ddd'>";
+        $body .= "    <tbody>";
+        $body .= "       <tr>";
+        $body .= "                    <td width='100%''>";
+        $body .= "                        <table width='100%' cellpadding='0' cellspacing='0' border='0' style='font-family:Helvetica,Arial;font-size:12px;color:#404040'>";
+        $body .= "                            <tbody>";
+        $body .= "                                <tr>";
+        $body .= "                                    <td bgcolor='#f2f2f2' width='100%'' style='border-radius:3px 3px 0px 0px;font-size:34px;font-weight:700;letter-spacing:-1px;border-bottom-style:solid;border-bottom-color:#ddd;border-bottom-width:1px;padding:20px 20px 20px'>";
+        $body .= "                                        <img src='http://learn.flushoutsolutions.com/img/flushout-logo.png' width='120' height='76' alt='FlushOut' style='display:block;border:0'>";
+        $body .= "                                    </td>";
+        $body .= "                                </tr>";
+        $body .= "                                <tr>";
+        $body .= "                                    <td width='100%' style='padding:30px 30px 20px'>";           
+        $body .= "                                       <h1 style='font-size:24px;font-weight:700;margin:0 0 5px;padding:0 0 6px;border:0;color:#404040 !important'>Not remember your password? No problem!</h1>";
+        $body .= "                                        <div>Hi! Reset your password selecting: <strong>Reset Password</strong>.</div>";  
+        $body .= "                                        <div style='text-align:center;padding:0' align='center'>";
+        $body .= "                                            <div style='vertical-align:top;text-align:center;display:inline-block;font-size:14px;color:#ffffff;background-color:#00a5d5;border-radius:3px;margin:20px 0;padding:6px 12px' align='center'>";
+        $body .= "                                                <a href='http://learn.flushoutsolutions.com/pages/resetpass.php?user=".$idUser."&code=".$code."' style='color:#fff!important;text-decoration:none!important;display:inline-block;background-color:#00a5d5;border:0' target='_blank'>";
+        $body .= "                                                Reset Password";
+        $body .= "                                                </a>"; 
+        $body .= "                                            </div>";
+        $body .= "                                        </div>";
+        $body .= "                                    </td>";
+        $body .= "                                </tr>";
+        $body .= "                            </tbody>";
+        $body .= "                        </table>";
+        $body .= "                    </td>";
+        $body .= "                </tr>";
+        $body .= "            </tbody>";
+        $body .= "        </table>";
+        $body .= "        </td>";
+        $body .= "        </tr>";
+        $body .= "        </tbody>";
+        $body .= "        </table>";
+        $body .= "        </div>";
+        $body .= "        </div>";
+
+        if ($email != '' && $code > 999){
+            if (mail($email,$subject,$body,$headers)){
+                $dadosSE["_id"] = $idUser;
+                $dadosSE["code_pass"] = $code;
+                $dadosSE["status_pass"] = 0;
+                return $this->con->update($this->table,$dadosSE);        
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }   
+    }
+
+    function setPass($idUser, $email, $userFrom, $companyFrom)
+    {   
+
+        $fromName = "FlushOut Contact";
+        $fromEmail = "contact@flushoutsolutions.com";
+        $code =  rand(1000,9999);
+
+        $headers = "From: $fromName $fromEmail\r\n";
+        $headers .= "X-Mailer: PHP5\n";
+        $headers .= 'MIME-Version: 1.0' . "\n";
+        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+         
+        $subject = "Welcome to FOLearn";
+        $body = "<div marginheight='0' marginwidth='0' style='font-family:Helvetica Neue,Helvetica,Arial,sans-serif;line-height:21px;color:#404040'>";
+        $body .= "<div style='max-width:650px;margin:0 auto;padding:20px 0'>";
+        $body .= "<table width='100%' cellpadding='0' cellspacing='0' border='0' style='font-family:Helvetica,Arial;font-size:12px;color:#404040'>";
+        $body .= "  <tbody>";
+        $body .= "   <tr>";
+        $body .=    "  <td width=100%'>";   
+        $body .= "<table bgcolor='#FFFFFF' width='97%' cellpadding='0' cellspacing='0' border='0' align='center' style='border-radius:4px;font-family:Helvetica,Arial;font-size:12px;color:#404040;border:1px solid #ddd'>";
+        $body .= "    <tbody>";
+        $body .= "       <tr>";
+        $body .= "                    <td width='100%''>";
+        $body .= "                        <table width='100%' cellpadding='0' cellspacing='0' border='0' style='font-family:Helvetica,Arial;font-size:12px;color:#404040'>";
+        $body .= "                            <tbody>";
+        $body .= "                                <tr>";
+        $body .= "                                    <td bgcolor='#f2f2f2' width='100%'' style='border-radius:3px 3px 0px 0px;font-size:34px;font-weight:700;letter-spacing:-1px;border-bottom-style:solid;border-bottom-color:#ddd;border-bottom-width:1px;padding:20px 20px 20px'>";
+        $body .= "                                        <img src='http://learn.flushoutsolutions.com/img/flushout-logo.png' width='120' height='76' alt='FlushOut' style='display:block;border:0'>";
+        $body .= "                                    </td>";
+        $body .= "                                </tr>";
+        $body .= "                                <tr>";
+        $body .= "                                    <td width='100%' style='padding:30px 30px 20px'>";           
+        $body .= "                                       <h1 style='font-size:24px;font-weight:700;margin:0 0 5px;padding:0 0 6px;border:0;color:#404040 !important'>Welcome to FOLearn!</h1>";
+        $body .= "                                        <div>Hi! The user ".$userFrom." of the company ".$companyFrom." create an account for you, please <strong>Set Your Password</strong>.</div>";  
+        $body .= "                                        <div style='text-align:center;padding:0' align='center'>";
+        $body .= "                                            <div style='vertical-align:top;text-align:center;display:inline-block;font-size:14px;color:#ffffff;background-color:#00a5d5;border-radius:3px;margin:20px 0;padding:6px 12px' align='center'>";
+        $body .= "                                                <a href='http://learn.flushoutsolutions.com/pages/resetpass.php?user=".$idUser."&code=".$code."' style='color:#fff!important;text-decoration:none!important;display:inline-block;background-color:#00a5d5;border:0' target='_blank'>";
+        $body .= "                                                Set Password";
+        $body .= "                                                </a>"; 
+        $body .= "                                            </div>";
+        $body .= "                                        </div>";
+        $body .= "                                    </td>";
+        $body .= "                                </tr>";
+        $body .= "                            </tbody>";
+        $body .= "                        </table>";
+        $body .= "                    </td>";
+        $body .= "                </tr>";
+        $body .= "            </tbody>";
+        $body .= "        </table>";
+        $body .= "        </td>";
+        $body .= "        </tr>";
+        $body .= "        </tbody>";
+        $body .= "        </table>";
+        $body .= "        </div>";
+        $body .= "        </div>";
+
+        if ($email != '' && $code > 999){
+            if (mail($email,$subject,$body,$headers)){
+                $dadosSE["_id"] = $idUser;
+                $dadosSE["code_pass"] = $code;
+                $dadosSE["status_pass"] = 0;
                 return $this->con->update($this->table,$dadosSE);        
             } else {
                 return false;

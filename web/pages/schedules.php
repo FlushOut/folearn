@@ -1,5 +1,6 @@
 <?php
 require_once("../config.php");
+verify_access($list_modules);
 
 $scheAdd = false;
 $scheUpd = false;
@@ -188,37 +189,19 @@ if($scheDel){
                                             </div>
                                             <div class="modal-body">
                                                 <form class="form-horizontal" id="form-validate" action="" method="post" />
-                                                    <input name="hdIdUser" id="hdIdUser" type="hidden"/>
-                                                    <input name="hdIdAct" id="hdIdAct" type="hidden"/>
-                                                    <input name="hdDate" id="hdDate" type="hidden"/>
                                                     <div class="control-group">
+                                                        <input name="hdIdUser" id="hdIdUser" type="hidden"/>
+                                                        <input name="hdIdAct" id="hdIdAct" type="hidden"/>
+                                                        <input name="hdDate" id="hdDate" type="hidden"/>
                                                         <div class="controls" style="margin-left: 100px !important;">
                                                         </div>
                                                     </div>
-                                                    <p align="center">
-                                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                                                    <button class="btn btn-primary" id="btnSave" name="action" value="Save">Save</button>
-                                                    <button class="btn btn-danger" id="btnDelete" name="action" value="Delete">Delete</button>
-                                                    </p>
                                                 </form>
                                             </div>
-                                        </div>
-                                        <!-- Modal Error-->
-                                        <div id="myModalError" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                                            <div class="modal-header">
-                                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                                <h3 id="myModalLabel">Incorrect Date</h3>
-                                            </div>
-                                            <div class="modal-body">
-                                                <form class="form-horizontal" id="form-validate" action="" method="post" />
-                                                    <input name="hdIdDE" id="hdIdDE" type="hidden"/>
-                                                    <div class="control-group">
-                                                        <label class="control-label" style="width:100% !important;text-align:center !important;">Selected Date is less than the Current Date</label>
-                                                    </div>
-                                                    <p align="center">
-                                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                                                    </p>
-                                                </form>
+                                            <div class="modal-footer">
+                                                <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                                                <button class="btn btn-primary" form="form-validate" id="btnSave" name="action" value="Save">Save</button>
+                                                <button class="btn btn-danger" form="form-validate" id="btnDelete" name="action" value="Delete">Delete</button>
                                             </div>
                                         </div>
                                         <div class="box-body">

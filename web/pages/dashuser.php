@@ -1,5 +1,6 @@
 <?php
 require_once("../config.php");
+verify_access($list_modules);
 
 $emailSent = false;
 $lessApr = false;
@@ -157,13 +158,6 @@ if ($_POST['action'] == 'Submit') {
                                             <span class="color-silver-dark"><i class="icofont-edit color-teal"></i></span>
                                         </a>
                                     </li>
-                                    <li>
-                                        <a href="/pages/disciplines.php" class="a-btn grd-white" rel="tooltip" title="Disciplines">
-                                            <span></span>
-                                            <span><i class="icofont-book color-silver-dark"></i></span>
-                                            <span class="color-silver-dark"><i class="icofont-book color-orange"></i></span>
-                                        </a>
-                                    </li>
                                     <li class="clearfix"></li>
                                 </ul>
                             </div><!-- /shortcut button -->
@@ -180,7 +174,7 @@ if ($_POST['action'] == 'Submit') {
                                         <strong>Done!</strong> The lesson was Rejected
                                     </div>
                                     <!-- Modal Hours-->
-                                    <div id="myModalHoursLL" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 150px;margin-left: -90px;margin-top: 100px;">
+                                    <div id="myModalHoursLL" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 200px;margin-left: -90px;margin-top: 100px;">
                                         <div class="modal-header">
                                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                             <h3 id="myModalLabel">Hours</h3>
@@ -190,25 +184,43 @@ if ($_POST['action'] == 'Submit') {
                                                 <div class="controls" id="dvHoursLL">Loanding...</div>
                                             </div>
                                         </div>
+                                        <div class="modal-footer">
+                                            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                                        </div>
                                     </div>
                                     <!-- Modal Question-->
-                                    <div id="myModalQuestion" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="margin-left: -120px;margin-top: 100px;width: 260px;">
+                                    <div id="myModalQuestion" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="margin-left: -120px;margin-top: 100px;width: 280px;">
                                         <div class="modal-header">
                                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                             <h3 id="myModalLabel">Lessons</h3>
                                         </div>
                                         <div class="modal-body">
                                             <form class="form-horizontal" id="form-validate" action="" method="post" />
-                                                <input name="hdIdAR" id="hdIdAR" type="hidden"/>
-                                                <input name="hdEval" id="hdEval" type="hidden"/>
                                                 <div class="control-group">
+                                                    <input name="hdIdAR" id="hdIdAR" type="hidden"/>
+                                                    <input name="hdEval" id="hdEval" type="hidden"/>
                                                     <label class="control-label">Are you sure?</label>
                                                 </div>
-                                                <p align="center">
-                                                <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                                                <button class="btn" id="btnAR" name="action" value="Eval"></button>
-                                                </p>
                                             </form>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                                            <button class="btn" id="btnAR" form="form-validate" name="action" value="Eval"></button>
+                                        </div>
+                                    </div>
+                                    <!-- Modal Client Data-->
+                                    <div id="myModalClient" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="margin-left: -120px;margin-top: 100px;width: 350px;">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                            <h3 id="myModalLabel">Client Data</h3>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="control-group">
+                                                <div class="controls" id="dvClient">Loanding...</div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
                                         </div>
                                     </div>
                                     <div class="box-tab corner-all">
@@ -239,8 +251,8 @@ if ($_POST['action'] == 'Submit') {
                                                     foreach ($list_last_pend_lessons as $item) { ?>
                                                     <div class="media">
                                                         <div class="media-body">
-                                                            <h4 class="media-heading">Lesson of <?php echo $item->discipline; ?>&nbsp;&nbsp;<small class="helper-font-small">by <?php echo $item->client; ?> on <?php echo $item->date; ?> for <?php echo $item->hours; ?> hours</small></h4>
-                                                            <p>Gross value: (<?php echo $item->currency; ?>) <?php echo $item->value_wo_discount; ?>, Discount value: (<?php echo $item->currency; ?>) <?php echo $item->value_discount; ?>, Total value: (<?php echo $item->currency; ?>) <?php echo $item->value_total; ?></p>
+                                                            <h4 class="media-heading">Lesson of <?php echo $item->discipline; ?>&nbsp;&nbsp;<small class="helper-font-small">by <a href="#myModalClient" data-toggle="modal" id="aClient"><?php echo $item->client; ?></a> on <?php echo $item->date; ?> for <?php echo $item->hours; ?> hours</small></h4>
+                                                            <p>Price for Hour: (<?php echo $item->currency; ?>) <?php echo $item->price_hour_user; ?>, Total value: (<?php echo $item->currency; ?>) <?php echo $item->value_total_user; ?></p>
                                                             <div class="btn-group pull-right">
                                                                 <input name="hdId" type="hidden" value="<?php echo $item->id; ?>"/>
                                                                 <input name="hdIdMob" type="hidden" value="<?php echo $item->fk_mobile; ?>"/>
@@ -436,6 +448,24 @@ if ($_POST['action'] == 'Submit') {
                     return true;
                 });
 
+                //Client Data
+                $('a#aClient').bind('click',function(){
+                    $("#dvClient").html('Loanding...');
+                    jQuery(this).parents('div').map(function () {
+                        var idCli = jQuery('input[name="hdIdCli"]', this).val();
+                        var action = "getClientData";
+
+                        jQuery.ajax({
+                            url: "/ajax/actions.php",
+                            type: "POST",
+                            data: {id: idCli, action: action }
+                        }).done(function (resp) {
+                                $("#dvClient").html(resp);
+                            });
+                    });
+                    return true;
+                });
+
                 // wysihtml5
                 $('[data-form=wysihtml5]').wysihtml5()
                 toolbar = $('[data-form=wysihtml5]').prev();
@@ -477,7 +507,6 @@ if ($_POST['action'] == 'Submit') {
                     viewDisplay: function(view) {
                         var viewDate = $.fullCalendar.formatDate(view.start,'yyyy-MM-dd');
                         var viewMonth = viewDate.split('-')[1];
-                        console.log('viewMonth' + viewMonth);
                         var id = idUser;
                         var action = "getApprLessByIdMonth";
                         jQuery.ajax({
@@ -486,11 +515,9 @@ if ($_POST['action'] == 'Submit') {
                             data: {id: id, dt: viewMonth, action: action }
                         }).done(function (resp) {
                             var data = jQuery.parseJSON(resp);
-                            console.log('entro lesson length ' + data.lesson.length);
                             if(data.lesson.length > 0){
                                 $('#calendar').fullCalendar( 'removeEvents');
                                 for (var i = 0;i < data.lesson.length; i += 1) {
-                                    console.log('data '+ data.lesson[i].id+data.lesson[i].date+data.lesson[i].discipline+data.lesson[i].client);
                                     addEvent(data.lesson[i].id, data.lesson[i].date, data.lesson[i].discipline, data.lesson[i].client);
                                 }
                             }    

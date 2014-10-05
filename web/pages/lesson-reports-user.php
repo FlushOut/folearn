@@ -1,5 +1,6 @@
 <?php
 require_once("../config.php");
+verify_access($list_modules);
 
 $lessstatus = new lessonstatus();
 $list_less_statuses = $lessstatus->list_less_statuses();
@@ -86,29 +87,50 @@ $list_less_statuses = $lessstatus->list_less_statuses();
                                 <strong>Info!</strong> You no have information
                             </div>
                             <!-- Modal Hours-->
-                            <div id="myModalHours" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 150px;margin-left: -90px;margin-top: 100px;">
+                            <div id="myModalHours" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 200px;margin-left: -90px;margin-top: 100px;">
                                 <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                    <h3 id="myModalLabel">Hours</h3>
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    <h3 id="modal-recoverLabel">Hours</h3>
                                 </div>
                                 <div class="modal-body">
                                     <div class="control-group">
                                         <div id="dvHours" class="controls">Loanding...</div>
                                     </div>
                                 </div>
+                                <div class="modal-footer">
+                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                                </div>
+                            </div><!-- /Modal Hours-->
+                            <!-- Modal Client Data-->
+                            <div id="myModalClient" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="margin-left: -120px;margin-top: 100px;width: 350px;">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                    <h3 id="myModalLabel">Client Data</h3>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="control-group">
+                                        <div class="controls" id="dvClient">Loanding...</div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                                </div>
                             </div>
                             <!-- Modal Evaluation-->
                             <div id="myModalEval" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 300px;margin-left: -90px;margin-top: 100px;">
                                 <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                    <h3 id="myModalLabel">Evaluation</h3>
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    <h3 id="modal-recoverLabel">Evaluation</h3>
                                 </div>
                                 <div class="modal-body">
                                     <div class="control-group">
                                         <div id="dvEval" class="controls">Loanding...</div>
                                     </div>
                                 </div>
-                            </div>
+                                <div class="modal-footer">
+                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                                </div>
+                            </div><!-- /Modal Evaluation-->
                             <div class="row-fluid">
                                 <div class="span12">
                                     <div class="box corner-all">
@@ -154,20 +176,16 @@ $list_less_statuses = $lessstatus->list_less_statuses();
                                                 <thead>
                                                     <tr>
                                                         <th class="head0">Date</th>
-                                                        <th class="head1">User</th>
-                                                        <th class="head0">Client</th>
-                                                        <th class="head1">Discipline</th>
-                                                        <th class="head0">Hours</th>
-                                                        <th class="head1">Gross Value</th>
-                                                        <th class="head0">Discount Value</th>
+                                                        <th class="head1">Client</th>
+                                                        <th class="head0">Discipline</th>
+                                                        <th class="head1">Hours</th>
+                                                        <th class="head0">Price for Hour</th>
                                                         <th class="head1">Total Value</th>
                                                         <th class="head0">Evaluation</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                         <tr src="lesson-report">
-                                                            <td></td>
-                                                            <td></td>
                                                             <td></td>
                                                             <td></td>
                                                             <td></td>
@@ -317,6 +335,23 @@ $list_less_statuses = $lessstatus->list_less_statuses();
                         });
                         return true;
                     }); 
+                    //Client Data
+                    $('a#aClient').bind('click',function(){
+                        $("#dvClient").html('Loanding...');
+                        jQuery(this).parents('div').map(function () {
+                            var idCli = jQuery('input[name="hdIdCli"]', this).val();
+                            var action = "getClientData";
+
+                            jQuery.ajax({
+                                url: "/ajax/actions.php",
+                                type: "POST",
+                                data: {id: idCli, action: action }
+                            }).done(function (resp) {
+                                    $("#dvClient").html(resp);
+                                });
+                        });
+                        return true;
+                    });
                     // datatables
                     $('#datatables').dataTable( {
                         "bDestroy": true,
@@ -324,6 +359,18 @@ $list_less_statuses = $lessstatus->list_less_statuses();
                         "sPaginationType": "bootstrap",
                         "oLanguage": {
                                 "sLengthMenu": "_MENU_ records per page"
+                        },
+                        "fnFooterCallback": function ( nRow, aaData, iStart, iEnd, aiDisplay ) {
+                            var iTotal = 0;
+                            for ( var i=0 ; i<aaData.length ; i++ )
+                            {
+                                iTotal += parseFloat(aaData[i][5].split(' ')[1]);
+                            }
+                            
+                            
+                            /* Modify the footer row to match what we want */
+                            var nCells = nRow.getElementsByTagName('th');
+                            nCells[1].innerHTML = iTotal.toFixed(2);
                         }
                     });
                     

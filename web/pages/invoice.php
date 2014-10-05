@@ -1,5 +1,6 @@
 <?php
 require_once("../config.php");
+verify_access($list_modules);
 
 $country = new country();
 $country->open($company->fk_country);

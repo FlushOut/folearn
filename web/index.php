@@ -9,7 +9,13 @@ $list_countries = $country->list_countries();
 
 $errorUserPass = false;
 $errorInternal = false;
+$recoverPass = false;
 $errorPayment = false;
+$errorprofiles = false;
+
+if(isset($_GET["profiles"]) && trim($_GET["profiles"]) == 'false'){
+   $errorprofiles = true;
+}
 
 if (isset($_POST['login_username'])) {
     if (count($_POST['login_username']) > 0) {
@@ -47,7 +53,14 @@ if (isset($_POST['name'])) {
             if($idUser){
                 $response = $user->sendCode($idUser, $_POST['email']);
                 if($response > 0){
-                    redirect("/pages/verifyemail.php?user=".$idUser);        
+                    $payment = new payment();
+                    $user->open($idUser);
+                    $ins = $payment->createFree($user->fk_company);
+                    if($ins){
+                        redirect("/pages/verifyemail.php?user=".$idUser);
+                    }else{
+                        $errorInternal = true;            
+                    }
                 }else{
                     $errorInternal = true;        
                 }
@@ -56,6 +69,18 @@ if (isset($_POST['name'])) {
             }        
         }else{
             $errorInternal = true;
+        }
+    }
+}
+
+if ($_POST['action'] == 'Reset') {
+    if (isset($_POST['recover'])) {
+        $usrecover = new user();
+        $usrecover->open($_POST['recover']);
+        $idUser = $usrecover->id;
+        $response = $usrecover->recoverPass($idUser,$_POST['recover']);
+        if($response > 0){
+            $recoverPass = true;
         }
     }
 }
@@ -122,6 +147,34 @@ if (isset($_POST['name'])) {
             }
             </style>';
     }
+
+    if($recoverPass){
+        echo '<style type="text/css">
+            div[name=recoverPass] {
+                display: block !important;
+            }
+            </style>';
+    }else{
+        echo '<style type="text/css">
+            div[name=recoverPass] {
+                display: none !important;
+            }
+            </style>';
+    }
+
+    if($errorprofiles){
+        echo '<style type="text/css">
+            div[name=errorprofiles] {
+                display: block !important;
+            }
+            </style>';
+    }else{
+        echo '<style type="text/css">
+            div[name=errorprofiles] {
+                display: none !important;
+            }
+            </style>';
+    }
     ?>
     <body>
         <!-- section header -->
@@ -178,6 +231,14 @@ if (isset($_POST['name'])) {
                                     <div name="errorPayment" class="alert alert-error">
                                         <button type="button" class="close" data-dismiss="alert">×</button>
                                         <strong>Error!</strong> Your company is disabled due payment
+                                    </div>
+                                    <div name="recoverPass" class="alert alert-success">
+                                        <button type="button" class="close" data-dismiss="alert">×</button>
+                                        <strong>Done!</strong> We send to your email the instructions to recover your password 
+                                    </div>
+                                    <div name="errorprofiles" class="alert">
+                                        <button type="button" class="close" data-dismiss="alert">×</button>
+                                        <strong>Warning!</strong> Your user was created, but no have profile
                                     </div>
                                     <div class="form-actions">
                                         <input type="submit" class="btn btn-block btn-large btn-primary" value="Sign into account" />
@@ -283,7 +344,7 @@ if (isset($_POST['name'])) {
                 </div>
                 <div class="modal-footer">
                     <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                    <input type="submit" form="form-recover" class="btn btn-primary" value="Send reset link" />
+                    <button class="btn btn-primary" form="form-recover" id="btnReset" name="action" value="Reset">Reset Password</button>
                 </div>
             </div><!-- /modal recover-->
             <!-- modal pricing -->

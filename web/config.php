@@ -51,17 +51,22 @@ if (isset($_SESSION['loginsession'])) {
     $menu = new menu();
     $isAdmin = false;
     $list_Access = $menu->getAccess($user->email);
-    foreach ($list_Access as $value) {
-        if (is_array($list_modules)) {
-            if (in_array($value, $list_modules)) {
-                continue;
+    if($list_Access){
+        foreach ($list_Access as $value) {
+            if (is_array($list_modules)) {
+                if (in_array($value, $list_modules)) {
+                    continue;
+                }
+            }
+            $list_modules[] = $value;
+            if($value['fk_profile'] == 1) $isAdmin = true;
+            if ($value['start_module'] == 1 and $value['first_profile'] == 1){
+                $url = $value['url'];
             }
         }
-        $list_modules[] = $value;
-        if($value['fk_profile'] == 1) $isAdmin = true;
-        if ($value['start_module'] == 1 and $value['first_profile'] == 1){
-            $url = $value['url'];
-        }
+    }else{
+        session_destroy();
+        redirect("/index.php?profiles=false");
     }
 }
 
@@ -78,7 +83,7 @@ function format_date($strDate)
     return "$d/$m/$Y at $G:$i:$s";
 }
 
-function verify_access(){
+function verify_access($list_modules){
     $access = 0;
     $URI="";
     $pos = strpos($_SERVER['REQUEST_URI'], '?');

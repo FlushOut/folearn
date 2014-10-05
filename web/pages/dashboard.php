@@ -1,5 +1,6 @@
 <?php
 require_once("../config.php");
+verify_access($list_modules);
 
 $emailSent = false;
 $dash = new dashboard();

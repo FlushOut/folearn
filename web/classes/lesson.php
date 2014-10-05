@@ -19,10 +19,13 @@ class lesson
     public $client;
     public $discipline;
     public $hours;
+    public $price_hour_comp;
+    public $price_hour_user;
     public $currency;
     public $value_wo_discount;
     public $value_discount;
-    public $value_total;
+    public $value_total_comp;
+    public $value_total_user;
 
     function lesson(){
         $this->con = new DataBase();
@@ -44,10 +47,13 @@ class lesson
             $this->client = $query['client'];
             $this->discipline = $query['discipline'];
             $this->hours = $query['hours'];
+            $this->price_hour_comp = $query['price_hour_comp'];
+            $this->price_hour_user = $query['price_hour_user'];
             $this->currency = $query['currency'];
             $this->value_wo_discount = $query['value_wo_discount'];
             $this->value_discount = $query['value_discount'];
-            $this->value_total = $query['value_total'];
+            $this->value_total_comp = $query['value_total_comp'];
+            $this->value_total_user = $query['value_total_user'];
 
             return true;
         }
@@ -63,7 +69,7 @@ class lesson
 
     function list_pend_lessons($fk_user)
     {
-        $query = $this->con->genericQuery("select l._id,fk_mobile, l.fk_client, DATE_FORMAT( l.date,  '%d/%m/%Y' ) as date, c.name as client, d.description as discipline, l.hours, l.currency, l.value_wo_discount, l.value_discount, l.value_total from " . $this->table . " l inner join disciplines d on l.fk_discipline = d._id inner join clients c on l.fk_client = c._id where fk_user = ".$fk_user." and fk_less_stat = 1 order by date");
+        $query = $this->con->genericQuery("select l._id,fk_mobile, l.fk_client, DATE_FORMAT( l.date,  '%d/%m/%Y' ) as date, c.name as client, d.description as discipline, l.hours, l.price_hour_user, l.currency, l.value_wo_discount, l.value_discount, l.value_total_user from " . $this->table . " l inner join disciplines d on l.fk_discipline = d._id inner join clients c on l.fk_client = c._id where fk_user = ".$fk_user." and fk_less_stat = 1 order by date");
 
         $objReturn = array();
 
@@ -78,7 +84,7 @@ class lesson
 
     function list_last_pend_lessons($fk_user)
     {
-        $query = $this->con->genericQuery("select l._id,fk_mobile, l.fk_client, DATE_FORMAT( l.date,  '%d/%m/%Y' ) as date, c.name as client, d.description as discipline, l.hours, l.currency, l.value_wo_discount, l.value_discount, l.value_total from " . $this->table . " l inner join disciplines d on l.fk_discipline = d._id inner join clients c on l.fk_client = c._id where fk_user = ".$fk_user." and fk_less_stat = 1 order by date LIMIT 3");
+        $query = $this->con->genericQuery("select l._id,fk_mobile, l.fk_client, DATE_FORMAT( l.date,  '%d/%m/%Y' ) as date, c.name as client, d.description as discipline, l.hours, l.price_hour_user, l.currency, l.value_wo_discount, l.value_discount, l.value_total_user from " . $this->table . " l inner join disciplines d on l.fk_discipline = d._id inner join clients c on l.fk_client = c._id where fk_user = ".$fk_user." and fk_less_stat = 1 order by date LIMIT 3");
 
         $objReturn = array();
 
@@ -103,12 +109,12 @@ class lesson
 
     function getByStatUserDate($idStatus,$idUsers,$dtStart,$dtEnd)
     {
-        return $query = $this->con->genericQuery("select l._id as id, l.fk_mobile, l.fk_client, DATE_FORMAT( l.date,  '%d/%m/%Y' ) as date, u.name as user, c.name as client, d.description as discipline, l.hours, l.value_wo_discount, l.value_discount, l.value_total, IFNULL(e._id,0) as evaluation from " . $this->table . " l inner join users u on l.fk_user = u._id inner join clients c on l.fk_client = c._id inner join disciplines d on l.fk_discipline = d._id left join lesson_evaluations e on l.fk_mobile = e.fk_lesson and l.fk_client = e.fk_client where l.fk_less_stat = ".$idStatus." and l.fk_user in ({$idUsers}) and (l.date between STR_TO_DATE(  '".$dtStart."',  '%d-%m-%Y' ) and STR_TO_DATE(  '".$dtEnd."',  '%d-%m-%Y' ))");
+        return $query = $this->con->genericQuery("select l._id as id, l.fk_mobile, l.fk_client, DATE_FORMAT( l.date,  '%d/%m/%Y' ) as date, u.name as user, c.name as client, d.description as discipline, l.hours, l.price_hour_comp, l.price_hour_user, l.value_wo_discount, l.value_discount, l.value_total_comp, l.value_total_user, IFNULL(e._id,0) as evaluation from " . $this->table . " l inner join users u on l.fk_user = u._id inner join clients c on l.fk_client = c._id inner join disciplines d on l.fk_discipline = d._id left join lesson_evaluations e on l.fk_mobile = e.fk_lesson and l.fk_client = e.fk_client where l.fk_less_stat = ".$idStatus." and l.fk_user in ({$idUsers}) and (l.date between STR_TO_DATE(  '".$dtStart."',  '%d-%m-%Y' ) and STR_TO_DATE(  '".$dtEnd."',  '%d-%m-%Y' ))");
     }
 
     function getApprLessByIdMonth($idUser,$month)
     {
-        $query = $this->con->genericQuery("select l._id,fk_mobile, l.fk_client, DATE_FORMAT( l.date,  '%d/%m/%Y' ) as date, c.name as client, d.description as discipline, l.hours, l.currency, l.value_wo_discount, l.value_discount, l.value_total from " . $this->table . " l inner join disciplines d on l.fk_discipline = d._id inner join clients c on l.fk_client = c._id where fk_user = ".$idUser." and MONTH(date)='".$month."' and fk_less_stat = 2");
+        $query = $this->con->genericQuery("select l._id,fk_mobile, l.fk_client, DATE_FORMAT( l.date,  '%d/%m/%Y' ) as date, c.name as client, d.description as discipline, l.hours, l.currency, l.value_wo_discount, l.value_discount, l.value_total_user from " . $this->table . " l inner join disciplines d on l.fk_discipline = d._id inner join clients c on l.fk_client = c._id where fk_user = ".$idUser." and MONTH(date)='".$month."' and fk_less_stat = 2");
 
         $objReturn = array();
 

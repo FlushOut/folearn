@@ -56,7 +56,7 @@ class menu {
                                       order by m._id");
             
         if (count($query) == 0)
-            return '0';
+            return false;
         else {
             return $query;
         }

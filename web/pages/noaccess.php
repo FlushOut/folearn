@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <link rel="shortcut icon" href="../img/icon.png">
-        <title>Under Construction | FOLearn</title>
+        <title>No Access | FOLearn</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="description" content="" />
         <meta name="author" content="stilearning" />
@@ -48,8 +48,8 @@
         <section class="section">
             <div class="container">
                 <div class="error-page">
-                    <h1 class="error-code color-red">Under Construction</h1>
-                    <p class="error-description muted">Website is down for maintenance, please come back later</p>
+                    <h1 class="error-code color-red">No Access</h1>
+                    <p class="error-description muted">You have no access to this page</p>
                     <div class="divider-content help"><span></span></div>
                     <div class="shortcut-group">
                         <ul class="a-btn-group">

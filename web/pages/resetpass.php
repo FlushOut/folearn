@@ -7,24 +7,21 @@ $error = false;
 if (isset($_GET['user'])) {
     $u = $_GET['user'];
 }
+if (isset($_GET['code'])) {
+    $c = $_GET['code'];
+}
 
-if (isset($_POST['code'])) {
+if (isset($_POST['password'])) {
     $user = new user();
     if($u){
-        $uvc = $user->vEmail($u, ($_POST['code']));
+        $uvc = $user->resetPassword($u, $c, ($_POST['password']));
         if ($uvc) {
-            /*$payment = new payment();
-            $ins = $payment->createFree($uvc->fk_company);
-            if($ins){*/
-                $_SESSION['emailsession'] = $uvc->email;
-                $_SESSION['loginsession'] = $uvc->id;
-                redirect("/pages/menu.php");
-            /*} else {
-                $error = true;
-            }*/
+            $_SESSION['emailsession'] = $uvc->email;
+            $_SESSION['loginsession'] = $uvc->id;
+            redirect("/pages/menu.php");
         } else {
-            $error = true;
-        }    
+                $error = true;
+        }
     } else {
         $error = true;
     }
@@ -35,7 +32,7 @@ if (isset($_POST['code'])) {
 <html lang="en">
     <head>  
         <meta charset="utf-8" />
-        <title>Verify your Email | FOLearn</title>
+        <title>Reset Password | FOLearn</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="description" content="" />
         <meta name="author" content="stilearning" />
@@ -96,34 +93,39 @@ if (isset($_POST['code'])) {
         <section class="section">
             <div class="container">
                 <div class="signin-form row-fluid">
-                    <div name="errorResetPass" class="alert alert-error">
-                        <button type="button" class="close" data-dismiss="alert">×</button>
-                        <strong>Error!</strong> Incorrect Code
-                    </div>
-                    <!--Verify Email-->
+                    <!--Reset Pass-->
                     <div class="span4 offset4">
                         <div class="box corner-all">
                             <div class="box-header grd-teal color-white corner-top">
-                                <span>Insert your confirmation code:</span>
+                                <span>Reset your password:</span>
                             </div>
                             <div class="box-body bg-white">
-                                <form id="confirmation-code" method="post">
+                                <form id="reset-password" method="post">
                                     <div class="control-group">
-                                        <label class="control-label">Code:</label>
+                                        <label class="control-label">Password</label>
                                         <div class="controls">
-                                            <input type="text" class="input-block-level" data-validate="{required: true, messages:{required:'Please enter field code'}}" name="code" id="code" autocomplete="on" />
+                                            <input type="password" class="input-block-level" data-validate="{required: true, minlength: 6, messages:{required:'Please enter field password', minlength:'Please enter at least 6 characters'}}" name="password" id="password" autocomplete="off" />
+                                            <p class="help-block muted helper-font-small">The longer the better. Include numbers for protein.</p>
                                         </div>
                                     </div>
                                     <div class="control-group">
-                                        <p class="recover-account">(*)The confirmation code was sent to your email</p>
+                                        <label class="control-label">Password Again</label>
+                                        <div class="controls">
+                                            <input type="password" class="input-block-level" data-validate="{required: true, equalTo: '#password', messages:{required:'Please enter field confirm password', equalTo: 'confirmation password does not match the password'}}" name="password_again" id="password_again" autocomplete="off" />
+                                            <p class="help-block muted helper-font-small">Enter your password again.</p>
+                                        </div>
+                                    </div>
+                                    <div name="errorResetPass" class="alert alert-error">
+                                        <button type="button" class="close" data-dismiss="alert">×</button>
+                                        <strong>Error!</strong> The user did not request password change
                                     </div>
                                     <div class="form-actions">
-                                        <input type="submit" class="btn btn-block btn-large btn-primary" value="Verify" />
+                                        <input type="submit" class="btn btn-block btn-large btn-primary" value="Reset" />
                                     </div>
                                 </form>
                             </div>
                         </div>
-                    </div><!--/Verify Email-->
+                    </div><!--/Reset Pass-->
                 </div><!-- /row -->
             </div><!-- /container -->
 
@@ -152,7 +154,7 @@ if (isset($_POST['code'])) {
                 $('[data-form=uniform]').uniform();
                 
                 // validate
-                $('#confirmation-code').validate();
+                $('#reset-password').validate();
           });
         </script>
     </body>

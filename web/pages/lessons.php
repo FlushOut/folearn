@@ -1,5 +1,6 @@
 <?php
 require_once("../config.php");
+verify_access($list_modules);
 
 $lessApr = false;
 $lessRej = false;
@@ -139,7 +140,7 @@ if($lessRej){
                                             </div>
                                             <span>Pending Lessons&nbsp;&nbsp;&nbsp;&nbsp;</span>
                                             <!-- Modal Hours-->
-                                            <div id="myModalHours" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 150px;margin-left: -90px;margin-top: 100px;">
+                                            <div id="myModalHours" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 200px;margin-left: -90px;margin-top: 100px;">
                                                 <div class="modal-header">
                                                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                                     <h3 id="myModalLabel">Hours</h3>
@@ -149,25 +150,43 @@ if($lessRej){
                                                         <div class="controls">Loanding...</div>
                                                     </div>
                                                 </div>
+                                                <div class="modal-footer">
+                                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                                                </div>
+                                            </div>
+                                            <!-- Modal Client Data-->
+                                            <div id="myModalClient" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="margin-left: -120px;margin-top: 100px;width: 350px;">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                                    <h3 id="myModalLabel">Client Data</h3>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="control-group">
+                                                        <div class="controls" id="dvClient">Loanding...</div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                                                </div>
                                             </div>
                                             <!-- Modal Question-->
-                                            <div id="myModalQuestion" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="margin-left: -120px;margin-top: 100px;width: 260px;">
+                                            <div id="myModalQuestion" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="margin-left: -120px;margin-top: 100px;width: 280px;">
                                                 <div class="modal-header">
                                                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                                     <h3 id="myModalLabel">Lessons</h3>
                                                 </div>
                                                 <div class="modal-body">
                                                     <form class="form-horizontal" id="form-validate" action="" method="post" />
-                                                        <input name="hdIdAR" id="hdIdAR" type="hidden"/>
-                                                        <input name="hdEval" id="hdEval" type="hidden"/>
                                                         <div class="control-group">
+                                                            <input name="hdIdAR" id="hdIdAR" type="hidden"/>
+                                                            <input name="hdEval" id="hdEval" type="hidden"/>
                                                             <label class="control-label">Are you sure?</label>
                                                         </div>
-                                                        <p align="center">
-                                                        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                                                        <button class="btn" id="btnAR" name="action" value="Eval"></button>
-                                                        </p>
                                                     </form>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                                                    <button class="btn" id="btnAR" form="form-validate" name="action" value="Eval"></button>
                                                 </div>
                                             </div>
                                         </div>
@@ -180,8 +199,7 @@ if($lessRej){
                                                         <th class="head0">Client</th>
                                                         <th class="head1">Discipline</th>
                                                         <th class="head0">Hours</th>
-                                                        <th class="head1">Gross Value</th>
-                                                        <th class="head0">Discount Value</th>
+                                                        <th class="head1">Price for Hour</th>
                                                         <th class="head1">Total Value</th>
                                                         <th class="head0">Actions</th>
                                                     </tr>
@@ -191,12 +209,11 @@ if($lessRej){
                                                         <tr src="lesson">
                                                             <td><?php echo $item->id; ?><input name="hdId" type="hidden" value="<?php echo $item->id; ?>"/><input name="hdIdMob" type="hidden" value="<?php echo $item->fk_mobile; ?>"/><input name="hdIdCli" type="hidden" value="<?php echo $item->fk_client; ?>"/></td>
                                                             <td><?php echo $item->date; ?></td>
-                                                            <td><?php echo $item->client; ?></td>
+                                                            <td><a href="#myModalClient" role="button" class="btn btn-link" data-toggle="modal" id="aClient"><?php echo $item->client; ?></a></td>
                                                             <td><?php echo $item->discipline; ?></td>
                                                             <td><a href="#myModalHours" role="button" class="btn btn-link" data-toggle="modal" id="aHours"><?php echo $item->hours; ?></a></td>
-                                                            <td>(<?php echo $item->currency; ?>) <?php echo $item->value_wo_discount; ?></td>
-                                                            <td>(<?php echo $item->currency; ?>) <?php echo $item->value_discount; ?></td>
-                                                            <td>(<?php echo $item->currency; ?>) <?php echo $item->value_total; ?></td>
+                                                            <td>(<?php echo $item->currency; ?>) <?php echo $item->price_hour_user; ?></td>
+                                                            <td>(<?php echo $item->currency; ?>) <?php echo $item->value_total_user; ?></td>
                                                             <td>
                                                                 <div class="btn-group">
                                                                 <a href="#myModalQuestion" role="button" class="btn btn-small btn-primary" data-toggle="modal" id="aAppr">Approve</a>
@@ -309,6 +326,24 @@ if($lessRej){
                     });
                     return true;
                 }); 
+
+                //Client Data
+                $('a#aClient').bind('click',function(){
+                    $("#dvClient").html('Loanding...');
+                    jQuery(this).parents('div').map(function () {
+                        var idCli = jQuery('input[name="hdIdCli"]', this).val();
+                        var action = "getClientData";
+
+                        jQuery.ajax({
+                            url: "/ajax/actions.php",
+                            type: "POST",
+                            data: {id: idCli, action: action }
+                        }).done(function (resp) {
+                                $("#dvClient").html(resp);
+                            });
+                    });
+                    return true;
+                });
 
                 // datatables
                 $('#datatables').dataTable( {

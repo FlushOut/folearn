@@ -1,5 +1,6 @@
 <?php
 require_once("../config.php");
+verify_access($list_modules);
 
 $userAdd = false;
 $userUpd = false;
@@ -10,11 +11,12 @@ $newUser = new user();
 if ($_POST['action'] == 'Save') {
     if (isset($_POST['hdIdAct'])) {
         if ($_POST['hdIdAct'] == ""){
-            $newUser->save($company->id, $_POST['txtName'], $_POST['email'], $_POST['phone'], $_POST['txtPassword']);
+            $idUser = $newUser->saveMyUsers($company->id, $_POST['txtName'], $_POST['email'], $_POST['phone']);
+            $newUser->setPass($idUser, $_POST['email'], $user->name, $company->name);
             $userAdd = true;
         }else{
             $newUser->open($_POST['hdIdAct']);
-            $newUser->save($company->id, $_POST['txtName'], $_POST['email'], $_POST['phone'], $_POST['txtPassword']);
+            $newUser->saveMyUsers($company->id, $_POST['txtName'], $_POST['email'], $_POST['phone']);
             $userUpd = true;
         }
     }
@@ -193,89 +195,79 @@ if($userPro){
                                             </div>
                                             <span>Users&nbsp;&nbsp;&nbsp;&nbsp;</span>
                                             <a href="#myModal" role="button" class="btn" data-toggle="modal" id="aAdd">Add</a>
-                                                    <!-- Modal Save/Edit-->
-                                                    <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                                                        <div class="modal-header">
-                                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                                            <h3 id="myModalLabel">Information</h3>
+                                            <!-- Modal Save/Edit-->
+                                            <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                                    <h3 id="modal-recoverLabel">Information</h3>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form class="form-horizontal" id="form-validate-new-user" action="" method="post" />
+                                                        <div class="control-group">
+                                                            <label class="control-label" for="txtName">Name</label>
+                                                            <div class="controls">
+                                                                <input name="hdIdAct" id="hdIdAct" type="hidden"/>
+                                                                <input  type="text" id="txtName" name="txtName" />
+                                                            </div>
                                                         </div>
-                                                        <div class="modal-body">
-                                                            <form class="form-horizontal" id="form-validate-new-user" action="" method="post" />
-                                                                    <table>
-                                                                        <tr>
-                                                                            <td>Name</td>
-                                                                            <td>
-                                                                                <input name="hdIdAct" id="hdIdAct" type="hidden"/>
-                                                                                <input type="text" class="grd-white" id="txtName" name="txtName" />
-                                                                            </td>    
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td>Email</td>
-                                                                            <td>
-                                                                                <input type="text" class="grd-white" name="email" id="email" />
-                                                                            </td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td>Phone</td>
-                                                                            <td>
-                                                                                <input type="text" class="grd-white" name="phone" id="phone" />
-                                                                            </td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td>Password</td>
-                                                                            <td>
-                                                                                <input type="password" id="txtPassword" name="txtPassword" class="grd-white" name="password" id="password" />
-                                                                            </td>    
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td></td>
-                                                                            <td><button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                                                                            <button class="btn btn-primary" id="btnSave" name="action" value="Save">Save</button></td>
-                                                                        </tr>
-                                                                    </table>
-                                                            </form>
+                                                        <div class="control-group">
+                                                            <label class="control-label" for="email">Email</label>
+                                                            <div class="controls">
+                                                                <input  type="text" id="email" name="email" />
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <!-- Modal Profile-->
-                                                    <div id="myModalProfiles" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                                                        <div class="modal-header">
-                                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                                            <h3 id="myModalLabel">Select Profiles</h3>
+                                                        <div class="control-group">
+                                                            <label class="control-label" for="phone">Phone</label>
+                                                            <div class="controls">
+                                                                <input  type="text" id="phone" name="phone" />
+                                                            </div>
                                                         </div>
-                                                        <div class="modal-body">
-                                                            <form class="form-horizontal" id="form-validate" action="" method="post" />
-                                                                <input name="hdIdUP" id="hdIdUP" type="hidden"/>
-                                                                <div class="control-group">
-                                                                    <div class="controls">
-                                                                    </div>
-                                                                </div>
-                                                                <p align="center">
-                                                                <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                                                                <button class="btn btn-primary" id="btnSaveProfiles" name="action" value="SaveProfiles">Save</button>
-                                                                </p>
-                                                            </form>
+                                                    </form>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                                                    <button class="btn btn-primary" form="form-validate-new-user" id="btnSave" name="action" value="Save">Save</button>
+                                                </div>
+                                            </div><!-- /Modal Save/Edit-->
+                                            <!-- Modal Profile-->
+                                            <div id="myModalProfiles" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                                    <h3 id="modal-recoverLabel">Select Profiles</h3>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form class="form-horizontal" id="form-validate-profiles" action="" method="post" />
+                                                        <div class="control-group">
+                                                            <input name="hdIdUP" id="hdIdUP" type="hidden"/>
+                                                            <div class="controls" id="dvProfiles">
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <!-- Modal Delete-->
-                                                    <div id="myModalDelete" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="margin-left: -120px;margin-top: 100px;width: 260px;">
-                                                        <div class="modal-header">
-                                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                                            <h3 id="myModalLabel">Delete User</h3>
+                                                    </form>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                                                    <button class="btn btn-primary" form="form-validate-profiles" id="btnSaveProfiles" name="action" value="SaveProfiles">Save</button>
+                                                </div>
+                                            </div><!-- /Modal Profile-->
+                                            <!-- Modal Delete-->
+                                            <div id="myModalDelete" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="margin-left: -120px;margin-top: 100px;width: 280px;">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                                    <h3 id="modal-recoverLabel">Delete User</h3>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form class="form-horizontal" id="form-validate-delete-user" action="" method="post" />
+                                                        <div class="control-group">
+                                                            <input name="hdIdDE" id="hdIdDE" type="hidden"/>
+                                                            <label class="control-label">Are you sure?</label>
                                                         </div>
-                                                        <div class="modal-body">
-                                                            <form class="form-horizontal" id="form-validate" action="" method="post" />
-                                                                <input name="hdIdDE" id="hdIdDE" type="hidden"/>
-                                                                <div class="control-group">
-                                                                    <label class="control-label">Are you sure?</label>
-                                                                </div>
-                                                                <p align="center">
-                                                                <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                                                                <button class="btn btn-primary" id="btnDelete" name="action" value="Delete">Delete</button>
-                                                                </p>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-
+                                                    </form>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                                                    <button class="btn btn-primary" form="form-validate-delete-user" id="btnDelete" name="action" value="Delete">Delete</button>
+                                                </div>
+                                            </div><!-- Modal Delete-->
                                         </div>
                                         <div class="box-body">
                                             <table id="datatables" class="table table-bordered table-striped responsive">
@@ -303,6 +295,7 @@ if($userPro){
                                                                 <a href="#myModal" role="button" class="btn btn-link" data-toggle="modal" id="aEdit">Edit</a>
                                                                 <a href="#myModalDelete" role="button" class="btn btn-link" data-toggle="modal" id="aDelete">Delete</a>
                                                                 <a href="#myModalProfiles" role="button" class="btn btn-link" data-toggle="modal" id="aProfiles">Profiles</a>
+                                                                <a href="/pages/disciplines.php?user=<?php echo $item->id; ?>" role="button" class="btn btn-link">Disciplines</a>
                                                             </td>
                                                         </tr>
                                                     <?php } ?>
@@ -388,6 +381,7 @@ if($userPro){
                
                 //Edit Profile users
                 $('a#aProfiles').bind('click',function(){
+                    $("#dvProfiles").html('Loanding...');
                     jQuery(this).parents('tr').map(function () {
                         var id = jQuery('input[name="hdId"]', this).val();
                         var action = "getProfiles";
@@ -399,7 +393,7 @@ if($userPro){
                             type: "POST",
                             data: {id: id, action: action }
                         }).done(function (resp) {
-                                $(".controls").html(resp);
+                                $("#dvProfiles").html(resp);
                             });
                     });
                     return true;
@@ -454,10 +448,6 @@ if($userPro){
                                     }    
                                 }
                             },
-                            txtPassword: {
-                                required:false,
-                                minlength:6
-                            },
                             phone: {
                                 required:false,
                                 number:true
@@ -467,9 +457,6 @@ if($userPro){
                             email: {
                                 email: 'Please enter valid email address',
                                 remote: 'this new email is already in use'
-                            },
-                            txtPassword: {
-                                minlength: 'Please enter at least 6 characters'
                             },
                             phone: {
                                 number: 'May contain digits only'
@@ -487,7 +474,6 @@ if($userPro){
                     $("#txtName").val('');
                     $("#email").val('');
                     $("#phone").val('');
-                    $("#txtPassword").val('');
                     $("#btnSave").text('Save');
 
                     $('#form-validate-new-user').removeData('validator');
@@ -501,10 +487,6 @@ if($userPro){
                                 required:true,
                                 email:true,
                                 remote:'/ajax/validateemail.php'
-                            },
-                            txtPassword: {
-                                required:true,
-                                minlength:6
                             },
                             phone: {
                                 required:true,
@@ -520,10 +502,6 @@ if($userPro){
                                 email: 'Please enter valid email address',
                                 remote: 'This email is already in use'
                             },
-                            txtPassword: {
-                                required: 'Please enter field password',
-                                minlength: 'Please enter at least 6 characters'
-                            },
                             phone: {
                                 required: 'Please enter field phone',
                                 number: 'Please enter valid phone'
@@ -535,7 +513,8 @@ if($userPro){
                     validator.resetForm();
                 });
      
-                $('#form-validate').validate();
+                $('#form-validate-delete-user').validate();
+                $('#form-validate-profiles').validate();
                 
                 // uniform
                 $('[data-form=uniform]').uniform();

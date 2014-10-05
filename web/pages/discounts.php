@@ -1,5 +1,6 @@
 <?php
 require_once("../config.php");
+verify_access($list_modules);
 
 $discAdd = false;
 $discUpd = false;
@@ -172,68 +173,65 @@ if($discDel){
                                             <!-- Modal Save/Edit-->
                                             <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                                                 <div class="modal-header">
-                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                                    <h3 id="myModalLabel">Information</h3>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                                    <h3 id="modal-recoverLabel">Information</h3>
                                                 </div>
                                                 <div class="modal-body">
                                                     <form class="form-horizontal" id="form-validate-new-discount" action="" method="post" />
-                                                            <table>
-                                                                <tr>
-                                                                    <td>Code</td>
-                                                                    <td>
-                                                                        <input name="hdIdAct" id="hdIdAct" type="hidden"/>
-                                                                        <input type="text" class="grd-white" id="code" name="code" />
-                                                                    </td>    
-                                                                </tr>
-                                                                <tr>
-                                                                    <td>Percent</td>
-                                                                    <td>
-                                                                        <p>
-                                                                            <input  type="text" id="percent" name="percent" style="border: 0; color: #f6931f; font-weight: bold; width: 50px !important;" />
-                                                                            <span for="percent" class="helper-font-small">Max 100% </span>
-                                                                        </p>
-                                                                        <div style="width:300px !important;" id="slider-percent" class="slider-blue"></div>
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td>Range Condition</td>
-                                                                    <td>
-                                                                        <p>
-                                                                            <input  type="text" id="condition_start" name="condition_start" style="border: 0; color: #f6931f; font-weight: bold; width: 50px !important;" /> - 
-                                                                            <input  type="text" id="condition_end" name="condition_end" style="border: 0; color: #f6931f; font-weight: bold; width: 50px !important;" />
-                                                                            <span for="condition_start" class="helper-font-small">(<?php echo $country->currency; ?>)</span>
-                                                                        </p>
-                                                                        <div style="width:300px !important;" id="slider-range" class="slider-blue"></div>
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td></td>
-                                                                    <td><button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                                                                    <button class="btn btn-primary" id="btnSave" name="action" value="Save">Save</button></td>
-                                                                </tr>
-                                                            </table>
+                                                        <div class="control-group">
+                                                            <label class="control-label" for="code">Code</label>
+                                                            <div class="controls">
+                                                                <input name="hdIdAct" id="hdIdAct" type="hidden"/>
+                                                                <input type="text" class="grd-white" id="code" name="code" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="control-group">
+                                                            <label class="control-label" for="percent">Percent</label>
+                                                            <div class="controls">
+                                                                <p>
+                                                                    <input  type="text" id="percent" name="percent" style="border: 0; color: #f6931f; font-weight: bold; width: 50px !important;" />
+                                                                    <span for="percent" class="helper-font-small">Max 100% </span>
+                                                                </p>
+                                                                <div style="width:300px !important;" id="slider-percent" class="slider-blue"></div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="control-group">
+                                                            <label class="control-label" for="condition_start">Range Condition</label>
+                                                            <div class="controls">
+                                                                <p>
+                                                                    <input  type="text" id="condition_start" name="condition_start" style="border: 0; color: #f6931f; font-weight: bold; width: 50px !important;" /> - 
+                                                                    <input  type="text" id="condition_end" name="condition_end" style="border: 0; color: #f6931f; font-weight: bold; width: 50px !important;" />
+                                                                    <span for="condition_start" class="helper-font-small">(<?php echo $country->currency; ?>)</span>
+                                                                </p>
+                                                                <div style="width:300px !important;" id="slider-range" class="slider-blue"></div>
+                                                            </div>
+                                                        </div>
                                                     </form>
                                                 </div>
-                                            </div>
+                                                <div class="modal-footer">
+                                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                                                    <button class="btn btn-primary" form="form-validate-new-discount" id="btnSave" name="action" value="Save">Save</button>
+                                                </div>
+                                            </div><!-- /Modal Save/Edit-->
                                             <!-- Modal Delete-->
-                                            <div id="myModalDelete" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="margin-left: -120px;margin-top: 100px;width: 260px;">
+                                            <div id="myModalDelete" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="margin-left: -120px;margin-top: 100px;width: 280px;">
                                                 <div class="modal-header">
-                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                                    <h3 id="myModalLabel">Delete Discount</h3>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                                    <h3 id="modal-recoverLabel">Delete Discount</h3>
                                                 </div>
                                                 <div class="modal-body">
                                                     <form class="form-horizontal" id="form-validate" action="" method="post" />
-                                                        <input name="hdIdDE" id="hdIdDE" type="hidden"/>
                                                         <div class="control-group">
+                                                            <input name="hdIdDE" id="hdIdDE" type="hidden"/>
                                                             <label class="control-label">Are you sure?</label>
                                                         </div>
-                                                        <p align="center">
-                                                        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                                                        <button class="btn btn-primary" id="btnDelete" name="action" value="Delete">Delete</button>
-                                                        </p>
                                                     </form>
                                                 </div>
-                                            </div>
+                                                <div class="modal-footer">
+                                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                                                    <button class="btn btn-primary" form="form-validate" id="btnDelete" name="action" value="Delete">Delete</button>
+                                                </div>
+                                            </div><!-- Modal Delete-->
                                         </div>
                                         <div class="box-body">
                                             <table id="datatables" class="table table-bordered table-striped responsive">
