@@ -10,7 +10,7 @@ $list_pend_lessons = $lesson->list_pend_lessons($user->id);
 
 if ($_POST['action'] == 'Eval') {
     if (isset($_POST['hdIdAR'])) {
-        $lesson->change_status($_POST['hdIdAR'],$_POST['hdEval']);
+        $lesson->change_status($_POST['hdIdAR'],$_POST['hdEval'],$_POST['obs']);
         if($_POST['hdEval'] == '2'){
             $lessApr = true;
         }else if($_POST['hdEval'] == '3'){
@@ -180,7 +180,8 @@ if($lessRej){
                                                         <div class="control-group">
                                                             <input name="hdIdAR" id="hdIdAR" type="hidden"/>
                                                             <input name="hdEval" id="hdEval" type="hidden"/>
-                                                            <label class="control-label">Are you sure?</label>
+                                                            <label class="control-label" id="lblQuestion"></label>
+                                                            <textarea id="obs" name="obs" class="form-control" rows="3" placeholder="Enter the reason ..."></textarea>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -289,6 +290,11 @@ if($lessRej){
                         id = jQuery('input[name="hdId"]', this).val();
                     });
 
+                    $("#lblQuestion").show();
+                    $("#lblQuestion").empty();
+                    $("#lblQuestion").append("Are you sure?");
+                    $("#obs").val('');
+                    $("#obs").hide();
                     $("#hdIdAR").val(id);
                     $("#hdEval").val('2');
                     $("#btnAR").removeClass().addClass("btn btn-primary");
@@ -302,6 +308,9 @@ if($lessRej){
                         id = jQuery('input[name="hdId"]', this).val();
                     });
 
+                    $("#lblQuestion").hide();
+                    $("#obs").val('');
+                    $("#obs").show();
                     $("#hdIdAR").val(id);
                     $("#hdEval").val('3');
                     $("#btnAR").removeClass().addClass("btn btn-danger");

@@ -26,6 +26,7 @@ class lesson
     public $value_discount;
     public $value_total_comp;
     public $value_total_user;
+    public $observations;
 
     function lesson(){
         $this->con = new DataBase();
@@ -54,15 +55,22 @@ class lesson
             $this->value_discount = $query['value_discount'];
             $this->value_total_comp = $query['value_total_comp'];
             $this->value_total_user = $query['value_total_user'];
+            $this->observations = $query['observations'];
 
             return true;
         }
     }
 
     
-    function change_status($id, $fk_less_stat)
+    function change_status($id, $fk_less_stat, $obs)
     {
-        $query = $this->con->genericQuery("update " . $this->table . " set fk_less_stat = ".$fk_less_stat." where _id = ".$id);
+        if(strlen(rtrim($obs))>0){
+            $query = $this->con->genericQuery("update " . $this->table . " set fk_less_stat = ".$fk_less_stat.", observations = '".$obs."' where _id = ".$id);
+        }else{
+            $query = $this->con->genericQuery("update " . $this->table . " set fk_less_stat = ".$fk_less_stat." where _id = ".$id);
+        }
+
+        
 
         return true;
     }
@@ -109,7 +117,7 @@ class lesson
 
     function getByStatUserDate($idStatus,$idUsers,$dtStart,$dtEnd)
     {
-        return $query = $this->con->genericQuery("select l._id as id, l.fk_mobile, l.fk_client, DATE_FORMAT( l.date,  '%d/%m/%Y' ) as date, u.name as user, c.name as client, d.description as discipline, l.hours, l.price_hour_comp, l.price_hour_user, l.value_wo_discount, l.value_discount, l.value_total_comp, l.value_total_user, IFNULL(e._id,0) as evaluation from " . $this->table . " l inner join users u on l.fk_user = u._id inner join clients c on l.fk_client = c._id inner join disciplines d on l.fk_discipline = d._id left join lesson_evaluations e on l.fk_mobile = e.fk_lesson and l.fk_client = e.fk_client where l.fk_less_stat = ".$idStatus." and l.fk_user in ({$idUsers}) and (l.date between STR_TO_DATE(  '".$dtStart."',  '%d-%m-%Y' ) and STR_TO_DATE(  '".$dtEnd."',  '%d-%m-%Y' ))");
+        return $query = $this->con->genericQuery("select l._id as id, l.fk_mobile, l.fk_client, DATE_FORMAT( l.date,  '%d/%m/%Y' ) as date, u.name as user, c.name as client, d.description as discipline, l.hours, l.price_hour_comp, l.price_hour_user, l.value_wo_discount, l.value_discount, l.value_total_comp, l.value_total_user, IFNULL(l.observations,'') as observations, IFNULL(e._id,'') as evaluation from " . $this->table . " l inner join users u on l.fk_user = u._id inner join clients c on l.fk_client = c._id inner join disciplines d on l.fk_discipline = d._id left join lesson_evaluations e on l.fk_mobile = e.fk_lesson and l.fk_client = e.fk_client where l.fk_less_stat = ".$idStatus." and l.fk_user in ({$idUsers}) and (l.date between STR_TO_DATE(  '".$dtStart."',  '%d-%m-%Y' ) and STR_TO_DATE(  '".$dtEnd."',  '%d-%m-%Y' ))");
     }
 
     function getApprLessByIdMonth($idUser,$month)

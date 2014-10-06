@@ -131,6 +131,21 @@ $list_less_statuses = $lessstatus->list_less_statuses();
                                     <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
                                 </div>
                             </div><!-- /Modal Evaluation-->
+                            <!-- Modal Observations-->
+                            <div id="myModalObs" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 300px;margin-left: -90px;margin-top: 100px;">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    <h3 id="modal-recoverLabel">Evaluation</h3>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="control-group">
+                                        <div id="dvObs" class="controls"></div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                                </div>
+                            </div><!-- /Modal Observations-->
                             <div class="row-fluid">
                                 <div class="span12">
                                     <div class="box corner-all">
@@ -335,6 +350,22 @@ $list_less_statuses = $lessstatus->list_less_statuses();
                         });
                         return true;
                     }); 
+                     //Lesson Observations
+                    $('a#aObs').bind('click',function(){
+                        $("#dvObs").html('Loanding...');
+                        jQuery(this).parents('tr').map(function () {
+                            var hdObs = jQuery('input[name="hdObs"]', this).val();
+                            var ht = "";
+                            ht += '<label class="control-label">';
+                            ht += '<b>•&nbsp;Observations:</b>';
+                            ht += '</label>';
+                            ht += '<label class="control-label">';
+                            ht += hdObs;
+                            ht += '</label>';
+                            $("#dvObs").html(ht);
+                        });
+                        return true;
+                    }); 
                     //Client Data
                     $('a#aClient').bind('click',function(){
                         $("#dvClient").html('Loanding...');
@@ -400,9 +431,7 @@ $list_less_statuses = $lessstatus->list_less_statuses();
                         }
                     });
                 }
-
             });
-      
         </script>
     </body>
 </html>

@@ -1,7 +1,7 @@
 <?php require_once("../config.php");
 
 if (isset($_POST['id'])) $id = $_POST['id'];
-if (isset($_POST['idMob'])) $id = $_POST['idMob'];
+if (isset($_POST['idMob'])) $idMob = $_POST['idMob'];
 if (isset($_POST['idUsers'])) $idUsers = $_POST['idUsers'];
 if (isset($_POST['dtStart'])) $dtStart = $_POST['dtStart'];
 if (isset($_POST['dtEnd'])) $dtEnd = $_POST['dtEnd'];
@@ -219,7 +219,6 @@ function getDisciplinesUser($idUser,$idCountry){
 
 function getLessonDetails($idCli,$idMob){
     $lesson = new lesson();
-    $html = "";
     $list_lesson_details = $lesson->list_lesson_details($idCli,$idMob);
     foreach ($list_lesson_details as $item) {
         $html.= '<label class="control-label" style="text-align:center;">';
@@ -305,13 +304,15 @@ function getLessonsByStatUserDate($idStatus,$idUsers,$dtStart,$dtEnd,$idCountry)
                     $i = $i + 1;
     $html.= '       <tr src="lesson-report">';
     $html.= '           <td>'.$value['date'].'</td>';
-    $html.= '           <td><a href="#myModalClient" role="button" class="btn btn-link" data-toggle="modal" id="aClient">'.$value['client'].'</a></td><input name="hdId" type="hidden" value="'.$value['id'].'"/><input name="hdIdMob" type="hidden" value="'.$value['fk_mobile'].'"/><input name="hdIdCli" type="hidden" value="'.$value['fk_client'].'"/>';
+    $html.= '           <td><a href="#myModalClient" role="button" class="btn btn-link" data-toggle="modal" id="aClient">'.$value['client'].'</a></td><input name="hdId" type="hidden" value="'.$value['id'].'"/><input name="hdIdMob" type="hidden" value="'.$value['fk_mobile'].'"/><input name="hdIdCli" type="hidden" value="'.$value['fk_client'].'"/><input name="hdObs" type="hidden" value="'.$value['observations'].'"/>';
     $html.= '           <td>'.$value['discipline'].'</td>';
     $html.= '           <td><a href="#myModalHours" role="button" class="btn btn-link" data-toggle="modal" id="aHours">'.$value['hours'].'</a></td>';
     $html.= '           <td>('.$country->currency.') '.$value['price_hour_user'].'</td>';
     $html.= '           <td>('.$country->currency.') '.$value['value_total_user'].'</td>';
-    if($value['evaluation'] > 0){
+    if($value['evaluation'] != ''){
         $html.= '           <td><a href="#myModalEval" role="button" class="btn btn-link" data-toggle="modal" id="aEval">See</a></td>';
+    }elseif ($value['observations'] != ''){
+        $html.= '           <td><a href="#myModalObs" role="button" class="btn btn-link" data-toggle="modal" id="aObs">See</a></td>';
     }else{
         $html.= '           <td>Not evaluated</td>';
     }
@@ -370,7 +371,7 @@ function getLessonsByStatUsersDate($idStatus,$idUsers,$dtStart,$dtEnd,$idCountry
                     $i = $i + 1;
     $html.= '       <tr src="lesson-report">';
     $html.= '           <td>'.$value['date'].'</td>';
-    $html.= '           <td>'.$value['user'].'</td><input name="hdId" type="hidden" value="'.$value['id'].'"/><input name="hdIdMob" type="hidden" value="'.$value['fk_mobile'].'"/><input name="hdIdCli" type="hidden" value="'.$value['fk_client'].'"/>';
+    $html.= '           <td>'.$value['user'].'</td><input name="hdId" type="hidden" value="'.$value['id'].'"/><input name="hdIdMob" type="hidden" value="'.$value['fk_mobile'].'"/><input name="hdIdCli" type="hidden" value="'.$value['fk_client'].'"/><input name="hdObs" type="hidden" value="'.$value['observations'].'"/>';
     $html.= '           <td><a href="#myModalClient" role="button" class="btn btn-link" data-toggle="modal" id="aClient">'.$value['client'].'</a></td>';
     $html.= '           <td>'.$value['discipline'].'</td>';
     $html.= '           <td><a href="#myModalHours" role="button" class="btn btn-link" data-toggle="modal" id="aHours">'.$value['hours'].'</a></td>';
@@ -380,8 +381,10 @@ function getLessonsByStatUsersDate($idStatus,$idUsers,$dtStart,$dtEnd,$idCountry
     $html.= '           <td>('.$country->currency.') '.$value['value_discount'].'</td>';
     $html.= '           <td>('.$country->currency.') '.$value['value_total_user'].'</td>';
     $html.= '           <td>('.$country->currency.') '.$value['value_total_comp'].'</td>';
-    if($value['evaluation'] > 0){
+    if($value['evaluation'] != ''){
         $html.= '           <td><a href="#myModalEval" role="button" class="btn btn-link" data-toggle="modal" id="aEval">See</a></td>';
+    }elseif ($value['observations'] != ''){
+        $html.= '           <td><a href="#myModalObs" role="button" class="btn btn-link" data-toggle="modal" id="aObs">See</a></td>';
     }else{
         $html.= '           <td>Not evaluated</td>';
     }
